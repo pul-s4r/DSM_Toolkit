@@ -55,7 +55,7 @@ class DSMMatrix(object):
         assert mat.shape[0] == mat.shape[1], "Input matrix must be square"
         assert len(act_labels) == mat.shape[0], "Labels must match matrix"
 
-        self.mat = mat
+        self._mat = mat
         self.act_labels = act_labels
     
     def __len__(self):
@@ -70,6 +70,14 @@ class DSMMatrix(object):
         mat = np.zeros([size, size])
         act_labels = [None for _ in range(size)]
         return cls(mat, act_labels)
+
+    @property
+    def mat(self): 
+        return self._mat
+        
+    @mat.setter
+    def mat(self, val): 
+        self._mat = val
 
     @staticmethod
     def reorder_by_cluster(dsm_matrix, cluster_matrix):
