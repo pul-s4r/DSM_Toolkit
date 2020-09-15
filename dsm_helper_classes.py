@@ -79,6 +79,8 @@ class DSMMatrix(object):
 
         cl_mat = cluster_matrix.mat
         ds_mat = dsm_matrix.mat
+        
+        ds_mat = np.tril(ds_mat, k=-1) + np.diag(np.zeros(ds_mat.shape[0])) + np.triu(ds_mat, k=1)
 
         num_ele = cl_mat[cl_mat > 0].size
         temp_mat = np.zeros([num_ele, len(dsm_matrix)])
@@ -106,6 +108,12 @@ class ClusterMatrix(object):
         self._num_activities = n_clus
         self.update_cluster_size()
         self.total_coord_cost = 0
+    
+    def __repr__(self): 
+        return self.mat
+    
+    def __str__(self): 
+        return "ClusterMatrix(" + self.mat + ")"
 
     @classmethod
     def from_mat(cls, mat):
@@ -139,27 +147,43 @@ class ClusterMatrix(object):
             np.logical_or(self.mat[:,element], cluster_list)
 
     @staticmethod
-    def reorder_by_cluster(cluster_matrix):
-        """ Reorders the clusters in order as follows:
+    def reorder(cluster_matrix):
+        """ Reorders the clusters in order of row size (sum along columns):
 
-            The matrix:
+            For instance, 
+            (1) Input: 
             [[1, 0],                
              [1, 1]]
-
             becomes:
-            [[1, 0, 0],
-             [0, 1, 1]]
-
-            This function guarantees that an ordered cluster will be reordered to itself
+            [[1, 1],
+             [1, 0]]
+            
+            (2) Input: 
+            [[1, 1, 0], 
+             [0, 1, 0], 
+             [1, 1, 1]]
+            becomes: 
+            [[1, 1, 1], 
+             [1, 1, 0], 
+             [0, 1, 0]]
+            
+            If the input is an ordered cluster, the output is itself. If an equivalent ordering is found the original is returned. 
         """
-        new_clu_mat = ClusterMatrix.from_mat(np.zeros(\
-            [cluster_matrix.num_clusters, sum(cluster_matrix.cluster_size)]))
-
-        start = 0
-        for ind, row in enumerate(cluster_matrix.mat):
-            fin = start + row[row != 0].size
-            new_clu_mat.mat[ind, start:fin] = 1
-            start = fin
-
+        # import pdb; pdb.set_trace()
+        result = None
+        
+        new_clu_mat = ClusterMatrix.from_mat(np.zeros(cluster_matrix.mat.shape))
+        row_elems = np.sum(cluster_matrix.mat, axis=1)
+        row_elems_sorted = np.sort(row_elems, axis=0)
+        row_elems_indices = np.argsort(row_elems, axis=0)
+        row_elems_indices = np.flip(row_elems_indices, axis=0)
+        
+        new_clu_mat.mat = np.take(cluster_matrix.mat, row_elems_indices, axis=0)
         new_clu_mat.update_cluster_size()
-        return new_clu_mat
+        
+        if (row_elems == np.sum(new_clu_mat.mat, axis=1)).all(): 
+            result = cluster_matrix
+        else: 
+            result = new_clu_mat
+
+        return result
