@@ -104,16 +104,16 @@ class ClusterMatrix(object):
     def __init__(self, n_clus):
         """ Default constructor is to create a symmetric matrix and vector to track the cluster sizes
         """
-        self.mat = np.zeros((n_clus, n_clus))
+        self._mat = np.zeros((n_clus, n_clus))
         self._num_activities = n_clus
         self.update_cluster_size()
         self.total_coord_cost = 0
     
     def __repr__(self): 
-        return self.mat
+        return self._mat
     
     def __str__(self): 
-        return "ClusterMatrix(" + self.mat + ")"
+        return "ClusterMatrix(" + self._mat + ")"
 
     @classmethod
     def from_mat(cls, mat):
@@ -127,6 +127,14 @@ class ClusterMatrix(object):
         return cluster_mat
 
     @property
+    def mat(self): 
+        return self._mat
+        
+    @mat.setter
+    def mat(self, val): 
+        self._mat = val
+
+    @property
     def num_clusters(self):
         return len(self.cluster_size)
 
@@ -137,14 +145,14 @@ class ClusterMatrix(object):
     def update_cluster_size(self):
         """ Updates the cluster_size array to reflect changes in mat
         """
-        self.cluster_size = np.array([row[row > 0].size for row in self.mat])
+        self.cluster_size = np.array([row[row > 0].size for row in self._mat])
 
     def update_mat(self, element, cluster_list):
         """ Updates the matrix to reflect a new bid in input cluster_list
         """
         assert len(cluster_list) == self.num_activities, "Number of elements in cluster_list must match the number of activities in this cluster matrix"
-        self.mat[:,element] = \
-            np.logical_or(self.mat[:,element], cluster_list)
+        self._mat[:,element] = \
+            np.logical_or(self._mat[:,element], cluster_list)
 
     @staticmethod
     def reorder(cluster_matrix):
