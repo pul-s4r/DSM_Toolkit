@@ -48,20 +48,57 @@ def set_default_cluster_parameters(max_size):
 class DSMMatrix(object):
     """ Lists activities in act_labels and dependencies in mat (2-d matrix)
     """
-    def __init__(self, mat, act_labels):
+    def __init__(self, mat, activity_labels=None):
         """ Default constructor is to accept a matrix and list of labels. Checks size of matrix and labels for correctness
         """
         assert len(mat.shape) == 2, "Input matrix must be two-dimensional"
         assert mat.shape[0] == mat.shape[1], "Input matrix must be square"
-        assert len(act_labels) == mat.shape[0], "Labels must match matrix"
+        assert activity_labels == None or isinstance(activity_labels, list), "Labels must be a list. If no labels are provided, use None"
 
         self._mat = mat
-        self.act_labels = act_labels
+        self._labels = []
+        self._system_elements = [];
+        if activity_labels: 
+            assert len(activity_labels) == mat.shape[0], "Labels must match matrix"
+            self._labels = activity_labels
+        else: 
+            self._labels = self._make_labels()
     
     def __len__(self):
         """ Built in len() method gives characteristic dimension of container
         """
-        return len(self.act_labels)
+        return len(self._labels)
+        
+    @property
+    def mat(self): 
+        return self._mat
+        
+    @mat.setter
+    def mat(self, val): 
+        self._mat = val
+    
+    def _set(self, row, col, val=1): 
+        self._mat[row, col] = val 
+        
+    def set(self, row=-1, col=-1): 
+        if row >= 0 and row < self._mat.shape[0] and col >= 0 and col < self._mat.shape[1]:
+            self._set(row, col, val=1)
+        else: 
+            raise ArithmeticError
+    
+    def unset(self, row=-1, col=-1): 
+        if row >= 0 and row < self._mat.shape[0] and col >= 0 and col < self._mat.shape[1]:
+            self._set(row, col, val=0)
+        else: 
+            raise ArithmeticError
+            
+    def clear_elements(self, elems): 
+        assert isinstance(elems, list) and all(isinstance(x, int) for x in elems)
+        assert(all(x >= 0 and x < self._mat.shape[0] for x in elems))
+        for i in elems: 
+            self._mat[i,:] = 0
+            self._mat[:,i] = 0
+            
 
     @classmethod
     def from_size(cls, size):
@@ -70,14 +107,23 @@ class DSMMatrix(object):
         mat = np.zeros([size, size])
         act_labels = [None for _ in range(size)]
         return cls(mat, act_labels)
-
+ 
     @property
-    def mat(self): 
-        return self._mat
+    def labels(self): 
+        return self._labels
+    
+    @labels.setter
+    def labels(self, val): 
+        assert len(val) == mat.shape[0], "Labels must match matrix"
+        self._labels = val
+ 
+    def _make_labels(self): 
+        """ Returns numerical labels for each element in the matrix
+        """
+        return [str(x+1) for x in range(self.mat.shape[0])]
         
-    @mat.setter
-    def mat(self, val): 
-        self._mat = val
+    def autolabel(self): 
+        self._labels = self._make_labels(); 
 
     @staticmethod
     def reorder_by_cluster(dsm_matrix, cluster_matrix):
@@ -99,12 +145,12 @@ class DSMMatrix(object):
             for ind, flag in enumerate(cluster):
                 if flag:
                     temp_mat[ii,:] = ds_mat[ind,:]
-                    new_ds_mat.act_labels[ii] = ind
+                    new_ds_mat.labels[ii] = ind
                     ii += 1
 
-        for ind, col in enumerate(new_ds_mat.act_labels):
+        for ind, col in enumerate(new_ds_mat.labels):
             new_ds_mat.mat[:,ind] = temp_mat[:,col]
-            new_ds_mat.act_labels[ind] = dsm_matrix.act_labels[col]
+            new_ds_mat.labels[ind] = dsm_matrix.labels[col]
 
         return new_ds_mat
 
