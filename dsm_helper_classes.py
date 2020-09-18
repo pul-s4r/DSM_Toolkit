@@ -63,6 +63,14 @@ class DSMMatrix(object):
             self._labels = activity_labels
         else: 
             self._labels = self._make_labels()
+            
+    @classmethod
+    def from_size(cls, size):
+        """ Alternate constructor for DSM matrix creating a blank matrix of given size and act_labels with all "None" values
+        """
+        mat = np.zeros([size, size])
+        act_labels = [None for _ in range(size)]
+        return cls(mat, act_labels)
     
     def __len__(self):
         """ Built in len() method gives characteristic dimension of container
@@ -98,15 +106,6 @@ class DSMMatrix(object):
         for i in elems: 
             self._mat[i,:] = 0
             self._mat[:,i] = 0
-            
-
-    @classmethod
-    def from_size(cls, size):
-        """ Alternate constructor for DSM matrix creating a blank matrix of given size and act_labels with all "None" values
-        """
-        mat = np.zeros([size, size])
-        act_labels = [None for _ in range(size)]
-        return cls(mat, act_labels)
  
     @property
     def labels(self): 

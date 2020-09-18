@@ -115,6 +115,10 @@ class DSMMatrixTestCase(unittest.TestCase):
         d2 = DSMMatrix(d2_mat)
         # print(d2.labels)
         assert d2.labels == ['1', '2', '3', '4']
+        
+    def test_from_size(self): 
+        d = DSMMatrix.from_size(3)
+        # print(d.mat)
     
     def test_setunset(self): 
         d_mat = np.array([[1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
@@ -154,8 +158,24 @@ class DSMMatrixTestCase(unittest.TestCase):
 # class BidTestCase(unittest.TestCase):
     # raise NotImplementedError
 
-# class ClusterTestCase(unittest.TestCase):
-    # raise NotImplementedError
+class ClusterTestCase(unittest.TestCase):
+    def test_cluster(self): 
+        d_mat = np.array([
+            [1, 0, 0, 0, 0, 0, 0, 0], 
+            [1, 1, 0, 0, 0, 0, 0, 0], 
+            [1, 0, 1, 0, 0, 1, 0, 0], 
+            [0, 1, 0, 1, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 1, 0, 0, 0], 
+            [0, 0, 0, 0, 1, 1, 0, 0], 
+            [0, 0, 0, 1, 0, 1, 1, 0], 
+            [0, 0, 0, 0, 0, 0, 1, 1]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+        
+        cg = ClusterGenerator(dsm_mat = d)
+        print(cg.dsm.mat)
+    
 
 if __name__ == "__main__":
     unittest.main()
