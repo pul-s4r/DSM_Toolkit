@@ -72,6 +72,9 @@ class DSMMatrix(object):
         act_labels = [None for _ in range(size)]
         return cls(mat, act_labels)
     
+    def __repr__(self): 
+        return self._mat
+    
     def __len__(self):
         """ Built in len() method gives characteristic dimension of container
         """
@@ -113,13 +116,13 @@ class DSMMatrix(object):
     
     @labels.setter
     def labels(self, val): 
-        assert len(val) == mat.shape[0], "Labels must match matrix"
+        assert len(val) == mat.shape[1], "Labels must match matrix"
         self._labels = val
  
     def _make_labels(self): 
         """ Returns numerical labels for each element in the matrix
         """
-        return [str(x+1) for x in range(self.mat.shape[0])]
+        return [str(x+1) for x in range(self.mat.shape[1])]
         
     def autolabel(self): 
         self._labels = self._make_labels(); 
@@ -128,6 +131,8 @@ class DSMMatrix(object):
     def reorder_by_cluster(dsm_matrix, cluster_matrix):
         """ Returns a new dsm_matrix object expanding out the elements in multiple clusters, also recalculating the size of this matrix
         """
+        assert isinstance(dsm_matrix, DSMMatrix)
+        assert isinstance(cluster_matrix, ClusterMatrix)
         assert cluster_matrix.num_activities == len(dsm_matrix), "Number of activities in cluster_matrix should be same as the dsm_matrix"
 
         cl_mat = cluster_matrix.mat
