@@ -1,10 +1,10 @@
-""" Tests for the implemented functions
-"""
-import unittest
+# """ Tests for the implemented functions
+# """
+# import unittest
 
-from clustering_functions import *
-from dsm_helper_classes import *
-from plotting_functions import *
+# from clustering_functions import *
+# from dsm_helper_classes import *
+# from plotting_functions import *
 
 # Test case for DSMMatrix.reorder_by_cluster
 class DSMReorderTestCase(unittest.TestCase):    
@@ -97,7 +97,7 @@ class ClusterReorderTestCase(unittest.TestCase):
         assert (newer_c_mat.mat == new_c_mat.mat).all()
 
 
-# Tests for dsm_helper_classes
+Tests for dsm_helper_classes
 
 class ClusterParametersTestCase(unittest.TestCase):
     # raise NotImplementedError
@@ -151,12 +151,12 @@ class DSMMatrixTestCase(unittest.TestCase):
         self.assertRaises(AssertionError, d.clear_elements, ["2", 1])
         self.assertRaises(AssertionError, d.clear_elements, [6])
 
-# class ClusterMatrixTestCase(unittest.TestCase):
-    # raise NotImplementedError
+class ClusterMatrixTestCase(unittest.TestCase):
+    raise NotImplementedError
 
-# Tests for clustering_functions
-# class BidTestCase(unittest.TestCase):
-    # raise NotImplementedError
+Tests for clustering_functions
+class BidTestCase(unittest.TestCase):
+    raise NotImplementedError
 
 class ClusterTestCase(unittest.TestCase):
     def test_cluster(self): 
@@ -174,8 +174,11 @@ class ClusterTestCase(unittest.TestCase):
         d = DSMMatrix(d_mat, activity_labels=d_list)
         
         cg = ClusterGenerator(dsm_mat = d)
-        print(cg.dsm.mat)
+        # print(cg.dsm.mat)
+        # print(cg._coord_cost(pow_cc=None))
+        # print(cg._cluster_list)
+        # print(cg._cluster_mat)
     
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+    # unittest.main()
