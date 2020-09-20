@@ -180,7 +180,53 @@ class ClusterTestCase(unittest.TestCase):
         # print(cg._cluster_mat.mat.shape)
     
     def test_coord_cost(self): 
-        pass
+        d_mat = np.array([
+            [1, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [1, 0, 1, 0, 0, 1, 0, 0], 
+            [0, 0, 0, 1, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 1, 0, 0, 0], 
+            [0, 0, 0, 0, 1, 1, 0, 0], 
+            [0, 0, 0, 1, 0, 1, 1, 0], 
+            [0, 0, 0, 0, 0, 0, 1, 1]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+        
+        c_mat = np.diag(np.ones([8]))
+        c = ClusterMatrix.from_mat(c_mat)
+        cluster_size = np.ones([8, 1])
+        pow_cc = 1
+        
+        # cg = ClusterGenerator(dsm_mat = d)
+        
+        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
+        assert(initial_cost == 64)
+        
+        
+        d_mat = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [1, 0, 1, 0, 0, 0, 0, 0], 
+            [1, 0, 0, 1, 0, 0, 1, 0], 
+            [0, 0, 1, 1, 1, 0, 0, 0], 
+            [0, 0, 0, 1, 0, 1, 0, 0], 
+            [0, 0, 0, 0, 1, 1, 1, 0], 
+            [0, 0, 0, 0, 0, 0, 1, 1]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+        
+        c_mat = np.diag(np.ones([8]))
+        c = ClusterMatrix.from_mat(c_mat)
+        cluster_size = np.ones([8, 1])
+        pow_cc = 1
+        
+        # cg = ClusterGenerator(dsm_mat = d)
+        
+        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
+        assert(initial_cost == 80)
+        
 
 if __name__ == "__main__":
     unittest.main()

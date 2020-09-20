@@ -88,7 +88,7 @@ class ClusterGenerator(object):
         (Out of cluster) (DSM[i] + DSM[j])*DSM_size^pow_cc
         Sum each term to obtain the total. 
         """
-        assert isinstance(dsm_matrix, DSMMatrix)
+        assert isinstance(DSM_matrix, DSMMatrix)
         assert isinstance(cluster_matrix, ClusterMatrix)
     
         if isinstance(pow_cc, int): 
@@ -113,22 +113,23 @@ class ClusterGenerator(object):
         new_DSM_matrix = DSMMatrix.reorder_by_cluster(DSM_matrix, cluster_matrix)
         new_DSM_size = new_DSM_matrix.mat.shape[0]
         
-        num_cluster_elements = np.sum(cluster_matrix, axis=1)
+        num_cluster_elements = np.sum(cluster_matrix.mat, axis=1, dtype=np.int)
         n = 1
         new_cluster_matrix = ClusterMatrix.from_mat(np.zeros([new_DSM_size, new_DSM_size]))
         
         # Create a new cluster matrix that matches the reordered DSM matrix 
         # 
+        
         for i in range(n_clusters): 
             new_cluster_matrix.mat[i,n:n+num_cluster_elements[i]-1] = np.ones(1, num_cluster_elements[i])
             n += num_cluster_elements[i]
         
         # get new cluster size array matching matrix 
-        new_cluster_size = np.sum(new_cluster_matrix, axis=1)
+        new_cluster_size = np.sum(new_cluster_matrix.mat, axis=1)
         
         # replace old data with new data for cost calculation 
-        DSM_size = new_DSM_size
         DSM_matrix = new_DSM_matrix
+        DSM_size = new_DSM_size
         cluster_matrix = new_cluster_matrix
         cluster_size = new_cluster_size
 
@@ -136,23 +137,22 @@ class ClusterGenerator(object):
         n_clusters = cluster_matrix.mat.shape[0]
         DSM_size = cluster_matrix.mat.shape[1]
         total_coord_cost = 0
-        coordination_cost = np.zeros([1, DSM_size])
+        coordination_cost = np.zeros([DSM_size, 1])
         
-        # Calculate the cost of the solution
-        
+        # Calculate the cost of the solution        
         for i in range(DSM_size): 
             for j in range(i+1, DSM_size): 
-                if dsm_matrix.mat[i,j] > 0 or dsm_matrix.mat[j,i] > 0: 
+                if DSM_matrix.mat[i,j] > 0 or DSM_matrix.mat[j,i] > 0: 
                     cost_total = 0
                     
                     for cluster_index in range(n_clusters): 
-                        if cluster_matrix.mat[cluster_index,i]+cluster_matrix(cluster_index,j] == 2: 
-                            cost_total += dsm_matrix.mat[i,j] + dsm_matrix.mat[j,i]
+                        if cluster_matrix.mat[cluster_index,i]+cluster_matrix.mat[cluster_index,j] == 2: 
+                            cost_total += DSM_matrix.mat[i,j] + DSM_matrix.mat[j,i]
                     
                     if cost_total > 0: 
                         cost_c = cost_total
                     else: 
-                        cost_c = (dsm_matrix.mat[i,j] + dsm_matrix.mat[j,i])*DSM_size^pow_cc
+                        cost_c = (DSM_matrix.mat[i,j] + DSM_matrix.mat[j,i])*DSM_size**pow_cc
                     coordination_cost[i] += cost_c
 
         total_coord_cost = np.sum(coordination_cost)
