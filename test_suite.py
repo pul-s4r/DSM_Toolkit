@@ -7,9 +7,9 @@ from dsm_helper_classes import *
 from plotting_functions import *
 
 # Test case for DSMMatrix.reorder_by_cluster
-class DSMReorderTestCase(unittest.TestCase):    
-    def test_reorder1(self): 
-        # d_mat = np.identity(3) 
+class DSMReorderTestCase(unittest.TestCase):
+    def test_reorder1(self):
+        # d_mat = np.identity(3)
         d_mat = np.array([[1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
         d_list = ["1", "2", "3", "4"]
         d = DSMMatrix(d_mat, d_list)
@@ -29,8 +29,8 @@ class DSMReorderTestCase(unittest.TestCase):
         lab_comp_1 = new_d_mat.labels == ['1', '3', '4', '2']
         assert val_comp_1.all()
         assert lab_comp_1
-    
-    def test_reorder2(self): 
+
+    def test_reorder2(self):
         d_mat_2 = np.array([[1, 0, 0, 1], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
         d_list_2 = ["1", "2", "3", "4"]
         d_2 = DSMMatrix(d_mat_2, d_list_2)
@@ -54,7 +54,7 @@ class DSMReorderTestCase(unittest.TestCase):
 
 # Test case for ClusterMatrix.reorder
 class ClusterReorderTestCase(unittest.TestCase):
-    def test_reorder1(self): 
+    def test_reorder1(self):
         c_mat = np.array([[1, 1, 0], [1, 0, 1], [1, 1, 1]])
         c = ClusterMatrix.from_mat(c_mat)
         new_c_mat = ClusterMatrix.reorder(c)
@@ -68,12 +68,12 @@ class ClusterReorderTestCase(unittest.TestCase):
         size_comp = new_c_mat.cluster_size == np.array([3, 2, 2])
         assert val_comp.all()
         assert size_comp.all()
-    
-    def test_reorder2(self): 
+
+    def test_reorder2(self):
         c_mat_2 = np.array([[1, 1, 0], [0, 1, 0], [1, 1, 1]])
         c_2 = ClusterMatrix.from_mat(c_mat_2)
         new_c_mat_2 = ClusterMatrix.reorder(c_2)
-    
+
         # print("Original: ")
         # print(c_2.mat)
         # print("Reordered: ")
@@ -85,8 +85,8 @@ class ClusterReorderTestCase(unittest.TestCase):
         size_comp_2 = new_c_mat_2.cluster_size == np.array([3, 2, 1])
         assert val_comp_2.all()
         assert size_comp_2.all()
-    
-    def test_invariance(self): 
+
+    def test_invariance(self):
         # Checks that a new cluster matrix (once reordered) is invariant under reordering
         c_mat = np.array([[1, 1, 0], [1, 0, 1], [1, 1, 1]])
         c = ClusterMatrix.from_mat(c_mat)
@@ -103,23 +103,23 @@ class ClusterParametersTestCase(unittest.TestCase):
     pass
 
 class DSMMatrixTestCase(unittest.TestCase):
-    def test_manual_labels(self): 
+    def test_manual_labels(self):
         d_mat = np.array([[1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
         d_list = ["a", "b", "c", "d"]
         d = DSMMatrix(d_mat, activity_labels=d_list)
         # print(d.labels)
-    
-    def test_auto_labels(self): 
+
+    def test_auto_labels(self):
         d2_mat = np.array([[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
         d2 = DSMMatrix(d2_mat)
         # print(d2.labels)
         assert d2.labels == ['1', '2', '3', '4']
-        
-    def test_from_size(self): 
+
+    def test_from_size(self):
         d = DSMMatrix.from_size(3)
         # print(d.mat)
-    
-    def test_setunset(self): 
+
+    def test_setunset(self):
         d_mat = np.array([[1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]])
         d_list = ["a", "b", "c", "d"]
         d = DSMMatrix(d_mat, activity_labels=d_list)
@@ -135,8 +135,8 @@ class DSMMatrixTestCase(unittest.TestCase):
         # d_mat[3,2] = 0
         self.assertRaises(ArithmeticError, d.unset, 4, 6)
         self.assertRaises(ArithmeticError, d.unset, -1, 0)
-    
-    def test_clear_systemelems(self): 
+
+    def test_clear_systemelems(self):
         d_mat = np.array([[1, 0, 1, 0], [1, 1, 1, 0], [1, 1, 1, 0], [0, 0, 1, 1]])
         d = DSMMatrix(d_mat)
         d.clear_elements([0])
@@ -158,75 +158,144 @@ class DSMMatrixTestCase(unittest.TestCase):
     # raise NotImplementedError
 
 class ClusterTestCase(unittest.TestCase):
-    def test_cluster(self): 
+    def test_cluster(self):
         d_mat = np.array([
-            [1, 0, 0, 0, 0, 0, 0, 0], 
-            [1, 1, 0, 0, 0, 0, 0, 0], 
-            [1, 0, 1, 0, 0, 1, 0, 0], 
-            [0, 1, 0, 1, 0, 0, 0, 0], 
-            [0, 0, 1, 1, 1, 0, 0, 0], 
-            [0, 0, 0, 0, 1, 1, 0, 0], 
-            [0, 0, 0, 1, 0, 1, 1, 0], 
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 1, 0, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 1, 1]
         ])
         d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
         d = DSMMatrix(d_mat, activity_labels=d_list)
         # print(d.mat.shape)
-        
+
         cg = ClusterGenerator(dsm_mat = d)
         # print(cg.dsm.mat)
         # print(cg._coord_cost(pow_cc=None))
         # print(cg._cluster_list)
         # print(cg._cluster_mat.mat.shape)
-    
-    def test_coord_cost(self): 
+
+    def test_coord_cost(self):
         d_mat = np.array([
-            [1, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [1, 0, 1, 0, 0, 1, 0, 0], 
-            [0, 0, 0, 1, 0, 0, 0, 0], 
-            [0, 0, 1, 1, 1, 0, 0, 0], 
-            [0, 0, 0, 0, 1, 1, 0, 0], 
-            [0, 0, 0, 1, 0, 1, 1, 0], 
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 1, 1]
         ])
         d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
         d = DSMMatrix(d_mat, activity_labels=d_list)
-        
+
         c_mat = np.diag(np.ones([8]))
         c = ClusterMatrix.from_mat(c_mat)
         cluster_size = np.ones([8, 1])
         pow_cc = 1
-        
+
         # cg = ClusterGenerator(dsm_mat = d)
-        
+
         initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
         assert(initial_cost == 64)
-        
-        
+
+
         d_mat = np.array([
-            [1, 0, 1, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [1, 0, 1, 0, 0, 0, 0, 0], 
-            [1, 0, 0, 1, 0, 0, 1, 0], 
-            [0, 0, 1, 1, 1, 0, 0, 0], 
-            [0, 0, 0, 1, 0, 1, 0, 0], 
-            [0, 0, 0, 0, 1, 1, 1, 0], 
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 1, 1]
         ])
         d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
         d = DSMMatrix(d_mat, activity_labels=d_list)
-        
+
         c_mat = np.diag(np.ones([8]))
         c = ClusterMatrix.from_mat(c_mat)
         cluster_size = np.ones([8, 1])
         pow_cc = 1
-        
+
         # cg = ClusterGenerator(dsm_mat = d)
-        
+
         initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
         assert(initial_cost == 80)
-        
+
+    def test_bid(self):
+        d_mat = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 1, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+        c_mat = np.diag(np.ones([8]))
+        c = ClusterMatrix.from_mat(c_mat)
+        cluster_size = np.ones([8, 1])
+
+        cg = ClusterGenerator(
+            dsm_mat = d)
+        cg.params = ClusterParameters(
+            pow_cc = 1,
+            pow_bid = 1,
+            pow_dep = 4,
+            max_cluster_size = 16,
+            rand_accept = 32,
+            rand_bid = 32,
+            times = 2,
+            stable_limit = 2,
+            max_repeat = 10
+        )
+
+        elmt = 7
+        cluster_bid = cg._make_bid(elmt, d, c, cluster_size)
+        # print(cluster_bid)
+        assert np.equal(cluster_bid, np.zeros([8, 1])).all()
+
+        d_mat2 = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+        d2 = DSMMatrix(d_mat2, activity_labels=d_list)
+        cg2 = ClusterGenerator(
+            dsm_mat = d2)
+        cg2.params = ClusterParameters(
+            pow_cc = 1,
+            pow_bid = 1,
+            pow_dep = 4,
+            max_cluster_size = 16,
+            rand_accept = 32,
+            rand_bid = 32,
+            times = 2,
+            stable_limit = 2,
+            max_repeat = 10
+        )
+
+        elmt = 0
+        cluster_bid_2 = cg2._make_bid(elmt, d, c, cluster_size)
+        # print(cluster_bid_2)
+        assert np.equal(cluster_bid_2, np.array([[0],[0],[16],[1],[0],[0],[0],[0]])).all()
+
+
 
 if __name__ == "__main__":
-    unittest.main()
+    CTC = ClusterTestCase()
+    CTC.test_bid()
+    # unittest.main()
