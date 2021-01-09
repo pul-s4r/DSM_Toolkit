@@ -293,9 +293,35 @@ class ClusterTestCase(unittest.TestCase):
         # print(cluster_bid_2)
         assert np.equal(cluster_bid_2, np.array([[0],[0],[16],[1],[0],[0],[0],[0]])).all()
 
+    def test_delete_clusters(self):
+        c_mat = np.diag(np.ones([8]))
+        c_mat[0, 3] = 1
+        c_mat[5, 3] = 1
+        c = ClusterMatrix.from_mat(c_mat)
+        c_size = np.array([[2],[1],[1],[1],[1],[2],[1],[1]])
+
+        cg = ClusterGenerator(default_size=8)
+
+        (new_c, new_c_size) = cg.delete_clusters(c_size, c)
+        new_c_result_mat = np.array([
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+
+        new_c_result = ClusterMatrix.from_mat(new_c_result_mat)
+        new_c_size_result = np.array([[2],[1],[1],[1],[2],[1],[1],[0]])
+        assert np.equal(new_c.mat, new_c_result.mat).all()
+        assert np.equal(new_c_size, new_c_size_result).all()
+
 
 
 if __name__ == "__main__":
-    CTC = ClusterTestCase()
-    CTC.test_bid()
-    # unittest.main()
+    # CTC = ClusterTestCase()
+    # CTC.test_delete_clusters()
+    unittest.main()

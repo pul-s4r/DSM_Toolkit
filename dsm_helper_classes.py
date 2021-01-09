@@ -58,12 +58,12 @@ class DSMMatrix(object):
         self._mat = mat
         self._labels = []
         self._system_elements = [];
-        if activity_labels: 
+        if activity_labels:
             assert len(activity_labels) == mat.shape[0], "Labels must match matrix"
             self._labels = activity_labels
-        else: 
+        else:
             self._labels = self._make_labels()
-            
+
     @classmethod
     def from_size(cls, size):
         """ Alternate constructor for DSM matrix creating a blank matrix of given size and act_labels with all "None" values
@@ -71,61 +71,61 @@ class DSMMatrix(object):
         mat = np.zeros([size, size])
         act_labels = [None for _ in range(size)]
         return cls(mat, act_labels)
-    
-    def __repr__(self): 
+
+    def __repr__(self):
         return self._mat
-    
+
     def __len__(self):
         """ Built in len() method gives characteristic dimension of container
         """
         return len(self._labels)
-        
+
     @property
-    def mat(self): 
+    def mat(self):
         return self._mat
-        
+
     @mat.setter
-    def mat(self, val): 
+    def mat(self, val):
         self._mat = val
-    
-    def _set(self, row, col, val=1): 
-        self._mat[row, col] = val 
-        
-    def set(self, row=-1, col=-1): 
+
+    def _set(self, row, col, val=1):
+        self._mat[row, col] = val
+
+    def set(self, row=-1, col=-1):
         if row >= 0 and row < self._mat.shape[0] and col >= 0 and col < self._mat.shape[1]:
             self._set(row, col, val=1)
-        else: 
+        else:
             raise ArithmeticError
-    
-    def unset(self, row=-1, col=-1): 
+
+    def unset(self, row=-1, col=-1):
         if row >= 0 and row < self._mat.shape[0] and col >= 0 and col < self._mat.shape[1]:
             self._set(row, col, val=0)
-        else: 
+        else:
             raise ArithmeticError
-            
-    def clear_elements(self, elems): 
+
+    def clear_elements(self, elems):
         assert isinstance(elems, list) and all(isinstance(x, int) for x in elems)
         assert(all(x >= 0 and x < self._mat.shape[0] for x in elems))
-        for i in elems: 
+        for i in elems:
             self._mat[i,:] = 0
             self._mat[:,i] = 0
- 
+
     @property
-    def labels(self): 
+    def labels(self):
         return self._labels
-    
+
     @labels.setter
-    def labels(self, val): 
+    def labels(self, val):
         assert len(val) == mat.shape[1], "Labels must match matrix"
         self._labels = val
- 
-    def _make_labels(self): 
+
+    def _make_labels(self):
         """ Returns numerical labels for each element in the matrix
         """
         return [str(x+1) for x in range(self.mat.shape[1])]
-        
-    def autolabel(self): 
-        self._labels = self._make_labels(); 
+
+    def autolabel(self):
+        self._labels = self._make_labels();
 
     @staticmethod
     def reorder_by_cluster(dsm_matrix, cluster_matrix):
@@ -137,7 +137,7 @@ class DSMMatrix(object):
 
         cl_mat = cluster_matrix.mat
         ds_mat = dsm_matrix.mat
-        
+
         ds_mat = np.tril(ds_mat, k=-1) + np.diag(np.zeros(ds_mat.shape[0])) + np.triu(ds_mat, k=1)
 
         num_ele = cl_mat[cl_mat > 0].size
@@ -166,11 +166,11 @@ class ClusterMatrix(object):
         self._num_activities = n_clus
         self.update_cluster_size()
         self.total_coord_cost = 0
-    
-    def __repr__(self): 
+
+    def __repr__(self):
         return self._mat
-    
-    def __str__(self): 
+
+    def __str__(self):
         return "ClusterMatrix(" + self._mat + ")"
 
     @classmethod
@@ -185,11 +185,11 @@ class ClusterMatrix(object):
         return cluster_mat
 
     @property
-    def mat(self): 
+    def mat(self):
         return self._mat
-        
+
     @mat.setter
-    def mat(self, val): 
+    def mat(self, val):
         self._mat = val
 
     @property
@@ -216,40 +216,40 @@ class ClusterMatrix(object):
     def reorder(cluster_matrix):
         """ Reorders the clusters in order of row size (sum along columns):
 
-            For instance, 
-            (1) Input: 
-            [[1, 0],                
+            For instance,
+            (1) Input:
+            [[1, 0],
              [1, 1]]
             becomes:
             [[1, 1],
              [1, 0]]
-            
-            (2) Input: 
-            [[1, 1, 0], 
-             [0, 1, 0], 
+
+            (2) Input:
+            [[1, 1, 0],
+             [0, 1, 0],
              [1, 1, 1]]
-            becomes: 
-            [[1, 1, 1], 
-             [1, 1, 0], 
+            becomes:
+            [[1, 1, 1],
+             [1, 1, 0],
              [0, 1, 0]]
-            
-            If the input is an ordered cluster, the output is itself. If an equivalent ordering is found the original is returned. 
+
+            If the input is an ordered cluster, the output is itself. If an equivalent ordering is found the original is returned.
         """
         # import pdb; pdb.set_trace()
         result = None
-        
+
         new_clu_mat = ClusterMatrix.from_mat(np.zeros(cluster_matrix.mat.shape))
         row_elems = np.sum(cluster_matrix.mat, axis=1)
         row_elems_sorted = np.sort(row_elems, axis=0)
         row_elems_indices = np.argsort(row_elems, axis=0)
         row_elems_indices = np.flip(row_elems_indices, axis=0)
-        
+
         new_clu_mat.mat = np.take(cluster_matrix.mat, row_elems_indices, axis=0)
         new_clu_mat.update_cluster_size()
-        
-        if (row_elems == np.sum(new_clu_mat.mat, axis=1)).all(): 
+
+        if (row_elems == np.sum(new_clu_mat.mat, axis=1)).all():
             result = cluster_matrix
-        else: 
+        else:
             result = new_clu_mat
 
         return result

@@ -193,8 +193,42 @@ class ClusterGenerator(object):
 
         return cluster_bid
 
-    def delete(self):
-        pass
+    def delete_clusters(self, cluster_size, cluster_matrix):
+        n_clusters = cluster_matrix.mat.shape[0]
+        n_elements = cluster_matrix.mat.shape[1]
+
+        new_cluster_matrix = ClusterMatrix.from_mat(np.zeros([n_clusters, n_elements]))
+        new_cluster_size = np.zeros([n_clusters,1])
+
+        # If clusters are equal or cluster j is completely contained in i
+        # Delete cluster j
+        for i in range(n_clusters):
+            for j in range(i+1, n_clusters):
+                if cluster_size[i] >= cluster_size[j] and cluster_size[j] > 0:
+                    if (np.logical_and(cluster_matrix.mat[i,:], \
+                        cluster_matrix.mat[j,:]) == cluster_matrix.mat[j,:]
+                        ).all():
+                        cluster_matrix.mat[j,:] = 0
+                        cluster_size[j] = 0
+
+        # If cluster i is completely contained in j
+        # Delete cluster i
+        for i in range(n_clusters):
+            for j in range(i+1, n_clusters):
+                if cluster_size[i] < cluster_size[j] and cluster_size[i] > 0:
+                    if (np.logical_and(cluster_matrix.mat[i,:], \
+                        cluster_matrix.mat[j,:]) == cluster_matrix.mat[i,:]
+                        ).all():
+                        cluster_matrix.mat[i,:] = 0
+                        cluster_size[i] = 0
+
+        # Delete clusters with no tasks
+        non_empty_cluster_index = np.array(cluster_size != 0)
+
+        new_cluster_matrix.mat[0:np.sum(non_empty_cluster_index),:] = cluster_matrix.mat[non_empty_cluster_index.flatten(),:]
+        new_cluster_size[0:np.sum(non_empty_cluster_index),:] = cluster_size[non_empty_cluster_index.flatten()]
+
+        return (new_cluster_matrix, new_cluster_size)
 
     def cluster(self):
         pass
