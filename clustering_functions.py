@@ -1,6 +1,7 @@
 from dsm_helper_classes import *
 import copy
 import numpy as np
+import sys
 
 class ClusterGenerator(object):
     """
@@ -44,7 +45,7 @@ class ClusterGenerator(object):
         self._cluster_size = np.ones([self._n_clusters, 1])
 
         # Calculate initial starting condition
-        self._total_coord_cost = ClusterGenerator._coord_cost(self._dsm_mat, self._cluster_mat, self._cluster_size, pow_cc = self._params.pow_cc)
+        self._total_coord_cost = ClusterGenerator._coord_cost(self._dsm_mat, self._cluster_mat, self._cluster_size, self._params)
         self._best_coord_cost = self._total_coord_cost
 
         self._cost_history = np.zeros([10000, 1])
@@ -79,7 +80,7 @@ class ClusterGenerator(object):
         self._params = param_object
 
     @staticmethod
-    def _coord_cost(DSM_matrix, cluster_matrix, cluster_size, pow_cc=None):
+    def _coord_cost(DSM_matrix, cluster_matrix, cluster_size, params):
         """
         Calculate the coordination cost of the cluster matrix.
         This routine checks all DSM interactions and adds to a total the cost of all intra-cluster interactions. Interactions outside of clusters are assigned a higher cost.
@@ -90,11 +91,10 @@ class ClusterGenerator(object):
         """
         assert isinstance(DSM_matrix, DSMMatrix)
         assert isinstance(cluster_matrix, ClusterMatrix)
+        assert isinstance(params, ClusterParameters)
 
-        if isinstance(pow_cc, int):
-            pass
-        elif not pow_cc and self._params:
-            pow_cc = self._params.pow_cc
+        if params:
+            pow_cc = params.pow_cc
         else:
             pow_cc = 1
 
@@ -114,23 +114,30 @@ class ClusterGenerator(object):
         new_DSM_size = new_DSM_matrix.mat.shape[0]
 
         num_cluster_elements = np.sum(cluster_matrix.mat, axis=1, dtype=np.int)
-        n = 1
-        new_cluster_matrix = ClusterMatrix.from_mat(np.zeros([new_DSM_size, new_DSM_size]))
+        n = 0 # indexing starts from zero
+        new_cluster_mat = ClusterMatrix.from_mat(np.zeros([new_DSM_size, new_DSM_size]))
 
         # Create a new cluster matrix that matches the reordered DSM matrix
         #
 
+        # formerly n_clusters - changed due to shape
+        # Check again to replicate MATLAB functionality - this is not a permanent fix
         for i in range(n_clusters):
-            new_cluster_matrix.mat[i,n:n+num_cluster_elements[i]-1] = np.ones(1, num_cluster_elements[i])
-            n += num_cluster_elements[i]
+            if i < new_DSM_size:
+                new_cluster_mat.mat[i,n:n+num_cluster_elements[i]] = np.ones([1, num_cluster_elements[i]])
+                n += num_cluster_elements[i]
+            else:
+                new_cluster_mat.mat = np.vstack([new_cluster_mat.mat, np.zeros(new_cluster_mat.mat.shape[1])])
+                new_cluster_mat.mat[i,n:n+num_cluster_elements[i]] = np.ones([1, num_cluster_elements[i]])
+                n += num_cluster_elements[i]
 
         # get new cluster size array matching matrix
-        new_cluster_size = np.sum(new_cluster_matrix.mat, axis=1)
+        new_cluster_size = np.sum(new_cluster_mat.mat, axis=1)
 
         # replace old data with new data for cost calculation
         DSM_matrix = new_DSM_matrix
         DSM_size = new_DSM_size
-        cluster_matrix = new_cluster_matrix
+        cluster_matrix = new_cluster_mat
         cluster_size = new_cluster_size
 
         # get the number of clusters and size of the DSM
@@ -147,7 +154,7 @@ class ClusterGenerator(object):
 
                     for cluster_index in range(n_clusters):
                         if cluster_matrix.mat[cluster_index,i]+cluster_matrix.mat[cluster_index,j] == 2:
-                            cost_total += DSM_matrix.mat[i,j] + DSM_matrix.mat[j,i]
+                            cost_total += (DSM_matrix.mat[i,j] + DSM_matrix.mat[j,i]) * cluster_size[cluster_index]**pow_cc
 
                     if cost_total > 0:
                         cost_c = cost_total
@@ -193,11 +200,12 @@ class ClusterGenerator(object):
 
         return cluster_bid
 
-    def delete_clusters(self, cluster_size, cluster_matrix):
+    def delete_clusters(self, cluster_size, cluster_mat):
+        cluster_matrix = ClusterMatrix.from_mat(cluster_mat.mat)
         n_clusters = cluster_matrix.mat.shape[0]
         n_elements = cluster_matrix.mat.shape[1]
 
-        new_cluster_matrix = ClusterMatrix.from_mat(np.zeros([n_clusters, n_elements]))
+        new_cluster_mat = ClusterMatrix.from_mat(np.zeros([n_clusters, n_elements]))
         new_cluster_size = np.zeros([n_clusters,1])
 
         # If clusters are equal or cluster j is completely contained in i
@@ -225,10 +233,160 @@ class ClusterGenerator(object):
         # Delete clusters with no tasks
         non_empty_cluster_index = np.array(cluster_size != 0)
 
-        new_cluster_matrix.mat[0:np.sum(non_empty_cluster_index),:] = cluster_matrix.mat[non_empty_cluster_index.flatten(),:]
+        new_cluster_mat.mat[0:np.sum(non_empty_cluster_index),:] = cluster_matrix.mat[non_empty_cluster_index.flatten(),:]
         new_cluster_size[0:np.sum(non_empty_cluster_index),:] = cluster_size[non_empty_cluster_index.flatten()]
 
-        return (new_cluster_matrix, new_cluster_size)
+        return (new_cluster_mat, new_cluster_size)
 
-    def cluster(self):
+    def cluster(self, DSM_matrix):
+        assert isinstance(DSM_matrix, DSMMatrix)
+
+        DSM_size = DSM_matrix.mat.shape[1]
+        n_clusters = DSM_size
+        max_repeat = 10
+
+        # Initialise states/history
+        coordination_cost = np.zeros([DSM_size, 1])
+        cluster_size = np.zeros([DSM_size, 1])
+        new_cluster_mat = ClusterMatrix.from_mat(np.zeros([n_clusters, n_clusters]))
+        new_cluster_size = np.zeros([DSM_size,1])
+        cluster_bid = np.zeros([DSM_size,1])
+        new_cluster_bid = np.zeros([DSM_size,1])
+        new_coordination_cost = np.zeros([DSM_size,1])
+        rnd_elmt_arr = np.zeros([DSM_size,1])
+        cluster_list = np.zeros([DSM_size,1])
+
+        # # Initialise cluster matrix (note this is already initialised at the start of the function, need to decide whether to use or not)
+        cluster_diagonals = np.ones([1, self._n_clusters])
+        cluster_mat = ClusterMatrix.from_mat(np.diag(cluster_diagonals.flatten()))
+        cluster_size = np.ones([self._n_clusters, 1])
+
+        # # Initial clustering starting cost
+        total_coord_cost = ClusterGenerator._coord_cost(DSM_matrix, cluster_mat, cluster_size, self._params)
+        best_coord_cost = total_coord_cost
+
+        # # Initialise cost history
+        cost_history = np.zeros([10000, 1])
+        history_index = 0
+
+        # # Store the best cluster matrix and corresponding cost and size
+        best_curr_cost = total_coord_cost
+        best_curr_cluster_mat = cluster_mat
+        best_curr_cluster_size = cluster_size
+
+        # Initialise control parameters
+        stable = 0;			#	toggle to indicate if the algorithm has met the stability criteria
+        change = 0;			#	toggle to indicate if a change should be made
+        accept1= 0;			#	toggle to indicate if the solution should be acccepted
+        first_run = 1;		#	toggle to indicate if it is the first run through
+        attempt = 0;		#	index to count the number of passes through the algorithm
+
+        # Initialise best cost history
+        cluster_matrix_history = []
+        cluster_size_history = []
+        total_coord_cost_history = []
+        cluster_matrix_history.append(self._cluster_mat)
+        cluster_size_history.append(self._cluster_size)
+        total_coord_cost_history.append(self._total_coord_cost)
+
+        # import pdb; pdb.set_trace()
+        while total_coord_cost > best_coord_cost and attempt <= max_repeat or first_run == 1:
+            if first_run == 0:
+                cluster_matrix_history.append(cluster_mat)
+                cluster_size_history.append(cluster_size)
+                total_coord_cost_history.append(total_coord_cost)
+                total_coord_cost 	= best_curr_cost
+                cluster_mat 	= best_curr_cluster_mat.copy()
+                cluster_size 		= best_cluster_size.copy()
+                history_index 		= history_index+1
+                cost_history[history_index,0] = total_coord_cost
+
+            first_run = 0
+            stable = 0
+            accept1 = 0
+            change = 0
+
+
+            print("Attempt: " + str(attempt))
+            while stable <= self._params.stable_limit:
+                for k in range(DSM_size*self._params.times):
+                    print("Total coord cost: " + str(total_coord_cost) + ", stable: " + str(stable) + ", change: ", str(change))
+
+                    elmt = np.ceil(np.random.randint(low=0, high=DSM_size-1))
+                    elmt = int(elmt)
+                    cluster_bid = self._make_bid(elmt, DSM_matrix, cluster_mat, cluster_size)
+
+                    best_cluster_bid = np.max(cluster_bid)
+                    second_best_cluster_bid = np.max(cluster_bid[cluster_bid != best_cluster_bid]) if cluster_bid[cluster_bid != best_cluster_bid].shape[0] else 0
+
+                    if np.floor(self._params.rand_bid * np.random.uniform()) == 0:
+                        best_cluster_bid = second_best_cluster_bid
+
+                    if best_cluster_bid > 0:
+                        # Determine if the bid is acceptable
+                        cluster_list[:,0] = 0
+                        # Determine the list of clusters affected
+                        cluster_list[0:n_clusters,0] = np.logical_and((cluster_bid == best_cluster_bid).flatten(), (cluster_mat.mat[:,elmt] == 0).flatten())
+
+                        # copy the cluster matrix into new matrices
+                        new_cluster_mat = cluster_mat.copy()
+                        new_cluster_size = cluster_size
+
+                        # proceed with cluster changes in the new cluster
+                        new_cluster_mat.mat[0:n_clusters, elmt] = np.logical_or(new_cluster_mat.mat[0:n_clusters, elmt].flatten(), cluster_list.flatten())
+                        new_cluster_size[0:n_clusters,0] = new_cluster_size[0:n_clusters,0] + (cluster_list == 1).flatten()*1
+
+                        # delete duplicate and empty clusters
+                        (new_cluster_mat, new_cluster_size) = self.delete_clusters(new_cluster_size, new_cluster_mat)
+
+                        # determine the change in the coordination cost
+                        new_total_coord_cost = ClusterGenerator._coord_cost(DSM_matrix, new_cluster_mat, new_cluster_size, self._params)
+                        if new_total_coord_cost <= total_coord_cost:
+                            accept1 = 1
+                        else:
+                            # still accept 1 out of approx random_accept times
+                            if (np.floor(self._params.rand_accept*np.random.uniform()) == 0):
+                                accept1 = 1
+                                # if we are going to accept a total cost that is not less than our current cost
+                                #  then
+                                # save the current cost as the best current cost found so far (only if the current cost
+                                # is lower than any best current cost previously saved) because we may not find
+                                # a cost that is better than the current cost.
+                                # When we think we are finished we will check the final cost against any best cost
+                                # if the final cost is not better than the lowest cost found, then we will move back to that best cost
+                                if total_coord_cost < best_curr_cost:
+                                    best_curr_cost = total_coord_cost
+                                    best_curr_cluster_mat = cluster_mat
+                                    best_cluster_size = cluster_size
+                                else:
+                                    accept1 = 0
+
+                    if accept1 == 1:
+                        accept1 = 0
+
+                        # Update the clusters
+                        total_coord_cost = new_total_coord_cost
+                        cluster_mat = new_cluster_mat.copy()
+                        cluster_size = new_cluster_size
+                        history_index += 1
+                        cost_history[history_index,0] = total_coord_cost
+
+                        if (best_coord_cost > total_coord_cost):
+                            best_coord_cost = total_coord_cost
+                            change += 1
+
+                # Test the system for instability
+                if change > 0:
+                    stable = 0
+                    change = 0
+                else:
+                    stable += 1
+
+                    pass
+
+                attempt += 1
+            pass
+        return (cluster_mat, total_coord_cost, cost_history)
+
+
         pass

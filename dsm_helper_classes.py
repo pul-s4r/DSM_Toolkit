@@ -37,8 +37,8 @@ def set_default_cluster_parameters(max_size):
         pow_bid = 1,
         pow_dep = 4,
         max_cluster_size = max_size,
-        rand_accept = 1 / (2 * max_size),
-        rand_bid = 1 / (2 * max_size),
+        rand_accept = (2 * max_size),
+        rand_bid = (2 * max_size),
         times = 2,
         stable_limit = 2,
         max_repeat = 10
@@ -63,6 +63,12 @@ class DSMMatrix(object):
             self._labels = activity_labels
         else:
             self._labels = self._make_labels()
+
+    def __repr__(self):
+        return str(self._mat)
+
+    def __str__(self):
+        return "ClusterMatrix(" + self._mat + ")"
 
     @classmethod
     def from_size(cls, size):
@@ -183,6 +189,11 @@ class ClusterMatrix(object):
         cluster_mat.update_cluster_size()
 
         return cluster_mat
+
+    def copy(self):
+        result = ClusterMatrix(self._num_activities)
+        result._mat = self._mat.copy()
+        return result
 
     @property
     def mat(self):

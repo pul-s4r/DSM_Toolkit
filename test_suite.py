@@ -1,6 +1,7 @@
 # """ Tests for the implemented functions
 # """
 import unittest
+import pdb, traceback, sys
 
 from clustering_functions import *
 from dsm_helper_classes import *
@@ -175,7 +176,7 @@ class ClusterTestCase(unittest.TestCase):
 
         cg = ClusterGenerator(dsm_mat = d)
         # print(cg.dsm.mat)
-        # print(cg._coord_cost(pow_cc=None))
+        # print(cg._coord_cost(cg.params))
         # print(cg._cluster_list)
         # print(cg._cluster_mat.mat.shape)
 
@@ -198,9 +199,9 @@ class ClusterTestCase(unittest.TestCase):
         cluster_size = np.ones([8, 1])
         pow_cc = 1
 
-        # cg = ClusterGenerator(dsm_mat = d)
+        cg = ClusterGenerator(dsm_mat = d)
 
-        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
+        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
         assert(initial_cost == 64)
 
 
@@ -224,8 +225,51 @@ class ClusterTestCase(unittest.TestCase):
 
         # cg = ClusterGenerator(dsm_mat = d)
 
-        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, pow_cc)
+        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
         assert(initial_cost == 80)
+
+    def test_coord_cost_2(self):
+        d_mat = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+
+        c_mat = np.array([
+            [1., 0., 1., 0., 0., 0., 0., 0.],
+            [0., 1., 0., 0., 0., 0., 0., 0.],
+            [0., 0., 0., 1., 0., 0., 0., 0.],
+            [0., 0., 0., 0., 1., 0., 0., 0.],
+            [0., 0., 0., 0., 0., 1., 0., 0.],
+            [0., 0., 0., 0., 0., 0., 1., 0.],
+            [0., 0., 0., 0., 0., 0., 0., 1.],
+            [0., 0., 0., 0., 0., 0., 0., 0.]
+          ])
+        c = ClusterMatrix.from_mat(c_mat)
+        cluster_size = np.array([
+            [2.],
+            [1.],
+            [1.],
+            [1.],
+            [1.],
+            [1.],
+            [1.],
+            [0.]])
+        pow_cc = 1
+
+        cg = ClusterGenerator(dsm_mat = d)
+
+        # import pdb; pdb.set_trace()
+        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
+        print(initial_cost)
+        assert(initial_cost == 20)
 
     def test_bid(self):
         d_mat = np.array([
@@ -319,9 +363,52 @@ class ClusterTestCase(unittest.TestCase):
         assert np.equal(new_c.mat, new_c_result.mat).all()
         assert np.equal(new_c_size, new_c_size_result).all()
 
+    def test_cluster(self):
+        d_mat = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+
+        cg = ClusterGenerator(default_size=8)
+
+        # try:
+        (cluster_matrix, total_coord_cost, cost_history) = cg.cluster(d)
+        # except:
+        #     extype, value, tb = sys.exc_info()
+        #     traceback.print_exc()
+        #     pdb.post_mortem(tb)
+            # pdb.runcall(DSMMatrix.reorder_by_cluster, DSM_matrix, cluster_matrix)
+
+        c_mat_result = np.array([
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ])
+        c_result = ClusterMatrix.from_mat(c_mat_result)
+        c_size_result = np.array([[2],[1],[2],[1],[1],[1],[0],[0]])
+        print(cluster_matrix.mat)
+
+        # import pdb; pdb.set_trace()
+        # assert np.equal(cluster_matrix.mat, c_result.mat).all()
+        initial_cost = ClusterGenerator._coord_cost(d, cluster_matrix, c_size_result, cg.params)
+        assert(initial_cost == 14 || initial_cost == 16)
 
 
 if __name__ == "__main__":
-    # CTC = ClusterTestCase()
-    # CTC.test_delete_clusters()
-    unittest.main()
+    CTC = ClusterTestCase()
+    CTC.test_cluster()
+    # CTC.test_coord_cost_2()
+    # unittest.main()
