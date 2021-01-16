@@ -164,6 +164,45 @@ class DSMMatrix(object):
 
         return new_ds_mat
 
+    @staticmethod
+    def place_diag(dsm_matrix):
+        """ Returns a new dsm_matrix object with the matrix diagonal populated
+        """
+        assert isinstance(dsm_matrix, DSMMatrix)
+
+        ds_mat = dsm_matrix.mat
+
+        num_ele = ds_mat.shape[0]
+        new_ds_mat = DSMMatrix.from_size(num_ele)
+
+        new_ds_mat.mat = np.tril(ds_mat, k=-1) + np.diag(np.ones(num_ele)) + np.triu(ds_mat, k=1)
+
+        return new_ds_mat
+
+    @staticmethod
+    def annotate_clusters(DSM_matrix, cluster_matrix):
+        assert isinstance(DSM_matrix, DSMMatrix)
+        assert isinstance(cluster_matrix, ClusterMatrix)
+        new_ds_mat = DSMMatrix(np.zeros(DSM_matrix.mat.shape))
+        new_ds_mat.mat = DSM_matrix.mat
+        new_clu_mat = ClusterMatrix.from_mat(np.zeros(cluster_matrix.mat.shape))
+        new_clu_mat.mat = cluster_matrix.mat
+
+        cluster_count = 10
+        s_i = 0
+        for c_i in range(cluster_matrix.mat.shape[0]):
+            n_el = np.sum(cluster_matrix.mat[c_i,:], axis=0)
+            for i in range(s_i, s_i+n_el):
+                for j in range(s_i, s_i+n_el):
+                    new_ds_mat.mat[i,j] = cluster_count if DSM_matrix.mat[i,j] != 0 else 0
+            s_i += n_el
+            cluster_count += 1
+
+        return new_ds_mat
+
+
+
+
 class ClusterMatrix(object):
     def __init__(self, n_clus):
         """ Default constructor is to create a symmetric matrix and vector to track the cluster sizes

@@ -310,7 +310,7 @@ class ClusterGenerator(object):
             print("Attempt: " + str(attempt))
             while stable <= self._params.stable_limit:
                 for k in range(DSM_size*self._params.times):
-                    print("Total coord cost: " + str(total_coord_cost) + ", stable: " + str(stable) + ", change: ", str(change))
+                    # print("Total coord cost: " + str(total_coord_cost) + ", stable: " + str(stable) + ", change: ", str(change))
 
                     elmt = np.ceil(np.random.randint(low=0, high=DSM_size-1))
                     elmt = int(elmt)

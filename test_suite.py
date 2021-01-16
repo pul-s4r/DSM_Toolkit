@@ -404,11 +404,42 @@ class ClusterTestCase(unittest.TestCase):
         # import pdb; pdb.set_trace()
         # assert np.equal(cluster_matrix.mat, c_result.mat).all()
         initial_cost = ClusterGenerator._coord_cost(d, cluster_matrix, c_size_result, cg.params)
-        assert(initial_cost == 14 || initial_cost == 16)
+        assert(initial_cost == 14 or initial_cost == 16)
+
+    def test_place_diag(self):
+        d_mat = np.array([
+            [0, 0, 1, 0, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 1],
+            [0, 0, 1, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0]
+        ])
+        d_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        d = DSMMatrix(d_mat, activity_labels=d_list)
+
+        d_diag = DSMMatrix.place_diag(d)
+
+        d_mat_result = np.array([
+            [1, 0, 1, 0, 0, 1, 0, 1],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 1],
+            [0, 0, 1, 1, 0, 0, 0, 1],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 1, 0, 0, 0, 1, 1, 0],
+            [1, 0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 0, 0, 1]
+        ])
+        d_result = DSMMatrix(d_mat_result, activity_labels=d_list)
+
+        assert np.equal(d_diag.mat, d_result.mat).all()
+
 
 
 if __name__ == "__main__":
-    CTC = ClusterTestCase()
-    CTC.test_cluster()
+    # CTC = ClusterTestCase()
+    # CTC.test_cluster()
     # CTC.test_coord_cost_2()
-    # unittest.main()
+    unittest.main()
