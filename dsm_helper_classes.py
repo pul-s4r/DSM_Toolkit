@@ -55,7 +55,7 @@ class DSMMatrix(object):
         assert mat.shape[0] == mat.shape[1], "Input matrix must be square"
         assert activity_labels == None or isinstance(activity_labels, list), "Labels must be a list. If no labels are provided, use None"
 
-        self._mat = mat
+        self._mat = mat.copy()
         self._labels = []
         self._system_elements = [];
         if activity_labels:

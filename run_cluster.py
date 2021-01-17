@@ -56,9 +56,9 @@ if __name__ == "__main__":
     c = ClusterMatrix.reorder(c_orig)
 
     # import pdb; pdb.set_trace()
-    d_new = DSMMatrix.reorder_by_cluster(d, c)
+    d_new = DSMMatrix.reorder_by_cluster(d_orig, c)
 
-    d_g = DSMMatrix.place_diag(d)
+    d_g = DSMMatrix.place_diag(d_orig)
     d_new_g = DSMMatrix.place_diag(d_new)
 
     graph_matrix(d_g, cluster_matrix=None,
