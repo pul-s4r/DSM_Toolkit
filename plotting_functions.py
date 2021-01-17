@@ -4,16 +4,16 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 
-def graph_matrix(DSM_matrix, cluster_matrix=None,
+def graph_matrix(gen_matrix, cluster_matrix=None,
     x_title='Element', y_title='Element', graph_title='DSM Matrix',
     x_tcklabel=None, y_tcklabel=None, print_flag=0):
     """ Graph the DSM and cluster matrix.
 
     """
-    assert isinstance(DSM_matrix, DSMMatrix)
+    assert isinstance(gen_matrix, DSMMatrix) or isinstance(gen_matrix, ClusterMatrix)
     # if not isinstance(cluster_matrix, ClusterMatrix)
 
-    ds_mat = DSM_matrix.mat
+    ds_mat = gen_matrix.mat
 
     (row_in, col_out) = np.where(ds_mat)
     m_value = ds_mat[ds_mat != 0]
@@ -26,13 +26,26 @@ def graph_matrix(DSM_matrix, cluster_matrix=None,
     max_value = np.max(m_value)
     data_scale = np.ceil(500/max_value)/20
 
-    x_tcklabel = DSM_matrix.labels
-    y_tcklabel = DSM_matrix.labels
+    if x_tcklabel is None and isinstance(gen_matrix, DSMMatrix):
+        x_tcklabel = gen_matrix.labels
+    elif isinstance(x_tcklabel, list):
+        if len(x_tcklabel) != ds_mat.shape[0]:
+            x_tcklabel = [str(x+1) for x in range(ds_mat.shape[0])]
+    else:
+        x_tcklabel = [str(x+1) for x in range(ds_mat.shape[0])]
+
+    if y_tcklabel is None and isinstance(gen_matrix, DSMMatrix):
+        y_tcklabel = gen_matrix.labels
+    elif isinstance(y_tcklabel, list):
+        if len(y_tcklabel) != ds_mat.shape[0]:
+            y_tcklabel = [str(x+1) for x in range(ds_mat.shape[0])]
+    else:
+        y_tcklabel = [str(x+1) for x in range(ds_mat.shape[0])]
 
     if isinstance(cluster_matrix, ClusterMatrix):
-        new_DSM_matrix = DSMMatrix.annotate_clusters(DSM_matrix, cluster_matrix)
-        orig_ds_mat = DSM_matrix.mat
-        ds_mat = new_DSM_matrix.mat
+        new_gen_matrix = DSMMatrix.annotate_clusters(gen_matrix, cluster_matrix)
+        orig_ds_mat = gen_matrix.mat
+        ds_mat = new_gen_matrix.mat
 
     fig, ax = plt.subplots()
     im = ax.imshow(ds_mat, cmap=plt.cm.Blues)
@@ -54,6 +67,9 @@ def graph_matrix(DSM_matrix, cluster_matrix=None,
 
     ax.set_title(graph_title)
     fig.tight_layout()
+    plt.draw()
+
+def block_exit():
     plt.show()
 
 if __name__ == "__main__":
@@ -82,3 +98,5 @@ if __name__ == "__main__":
     c = ClusterMatrix.from_mat(c_mat)
 
     graph_matrix(d, cluster_matrix=c)
+    graph_matrix(c)
+    block_exit()
