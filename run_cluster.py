@@ -64,7 +64,7 @@ if __name__ == "__main__":
     graph_matrix(d_g, cluster_matrix=None,
         x_title='Element', y_title='Element', graph_title='DSM Matrix (Original)',
         x_tcklabel=None, y_tcklabel=None, print_flag=0)
-    graph_matrix(c_orig, cluster_matrix=None,
+    graph_matrix(c, cluster_matrix=None,
         x_title='Element', y_title='Cluster', graph_title='Cluster Matrix',
         x_tcklabel=None, y_tcklabel=None, print_flag=0)
 
