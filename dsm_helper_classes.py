@@ -122,7 +122,7 @@ class DSMMatrix(object):
 
     @labels.setter
     def labels(self, val):
-        assert len(val) == mat.shape[1], "Labels must match matrix"
+        assert len(val) == self._mat.shape[1], "Labels must match matrix"
         self._labels = val
 
     def _make_labels(self):
@@ -176,6 +176,7 @@ class DSMMatrix(object):
         new_ds_mat = DSMMatrix.from_size(num_ele)
 
         new_ds_mat.mat = np.tril(ds_mat, k=-1) + np.diag(np.ones(num_ele)) + np.triu(ds_mat, k=1)
+        new_ds_mat.labels = dsm_matrix.labels
 
         return new_ds_mat
 
@@ -191,7 +192,7 @@ class DSMMatrix(object):
         cluster_count = 10
         s_i = 0
         for c_i in range(cluster_matrix.mat.shape[0]):
-            n_el = np.sum(cluster_matrix.mat[c_i,:], axis=0)
+            n_el = np.sum(cluster_matrix.mat[c_i,:], axis=0, dtype=np.int)
             for i in range(s_i, s_i+n_el):
                 for j in range(s_i, s_i+n_el):
                     new_ds_mat.mat[i,j] = cluster_count if DSM_matrix.mat[i,j] != 0 else 0
