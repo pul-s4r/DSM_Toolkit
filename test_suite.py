@@ -201,7 +201,7 @@ class ClusterTestCase(unittest.TestCase):
 
         cg = ClusterGenerator(dsm_mat = d)
 
-        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
+        initial_cost = ClusterGenerator._coord_cost(d, c, cg.params)
         assert(initial_cost == 64)
 
 
@@ -225,7 +225,7 @@ class ClusterTestCase(unittest.TestCase):
 
         # cg = ClusterGenerator(dsm_mat = d)
 
-        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
+        initial_cost = ClusterGenerator._coord_cost(d, c, cg.params)
         assert(initial_cost == 80)
 
     def test_coord_cost_2(self):
@@ -267,7 +267,7 @@ class ClusterTestCase(unittest.TestCase):
         cg = ClusterGenerator(dsm_mat = d)
 
         # import pdb; pdb.set_trace()
-        initial_cost = ClusterGenerator._coord_cost(d, c, cluster_size, cg.params)
+        initial_cost = ClusterGenerator._coord_cost(d, c, cg.params)
         print(initial_cost)
         assert(initial_cost == 20)
 
@@ -303,7 +303,7 @@ class ClusterTestCase(unittest.TestCase):
         )
 
         elmt = 7
-        cluster_bid = cg._make_bid(elmt, d, c, cluster_size)
+        cluster_bid = cg._make_bid(elmt, d, c)
         # print(cluster_bid)
         assert np.equal(cluster_bid, np.zeros([8, 1])).all()
 
@@ -333,7 +333,7 @@ class ClusterTestCase(unittest.TestCase):
         )
 
         elmt = 0
-        cluster_bid_2 = cg2._make_bid(elmt, d, c, cluster_size)
+        cluster_bid_2 = cg2._make_bid(elmt, d, c)
         # print(cluster_bid_2)
         assert np.equal(cluster_bid_2, np.array([[0],[0],[16],[1],[0],[0],[0],[0]])).all()
 
@@ -346,7 +346,8 @@ class ClusterTestCase(unittest.TestCase):
 
         cg = ClusterGenerator(default_size=8)
 
-        (new_c, new_c_size) = cg.delete_clusters(c_size, c)
+        new_c = cg.delete_clusters(c)
+        new_c_size = new_c.cluster_size
         new_c_result_mat = np.array([
             [1, 0, 0, 1, 0, 0, 0, 0],
             [0, 1, 0, 0, 0, 0, 0, 0],
@@ -359,7 +360,7 @@ class ClusterTestCase(unittest.TestCase):
         ])
 
         new_c_result = ClusterMatrix.from_mat(new_c_result_mat)
-        new_c_size_result = np.array([[2],[1],[1],[1],[2],[1],[1],[0]])
+        new_c_size_result = np.array([2,1,1,1,2,1,1,0])
         assert np.equal(new_c.mat, new_c_result.mat).all()
         assert np.equal(new_c_size, new_c_size_result).all()
 
@@ -403,7 +404,8 @@ class ClusterTestCase(unittest.TestCase):
 
         # import pdb; pdb.set_trace()
         # assert np.equal(cluster_matrix.mat, c_result.mat).all()
-        initial_cost = ClusterGenerator._coord_cost(d, cluster_matrix, c_size_result, cg.params)
+        initial_cost = ClusterGenerator._coord_cost(d, cluster_matrix, cg.params)
+        print("Cost: " + str(initial_cost))
         assert(initial_cost == 14 or initial_cost == 16)
 
     def test_place_diag(self):

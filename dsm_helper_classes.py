@@ -255,6 +255,7 @@ class ClusterMatrix(object):
         """ Updates the cluster_size array to reflect changes in mat
         """
         self.cluster_size = np.array([row[row > 0].size for row in self._mat])
+        # self.cluster_size = np.sum(self._mat, axis=1)
 
     def update_mat(self, element, cluster_list):
         """ Updates the matrix to reflect a new bid in input cluster_list
