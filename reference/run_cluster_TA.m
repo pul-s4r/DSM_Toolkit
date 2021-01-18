@@ -43,7 +43,7 @@
 
 % Elevator_DSM_varied; % enter name of DSM script file
 
-Test_DSM_2; % enter name of DSM script file
+Test_DSM_5C; % enter name of DSM script file
 
 
 % ********************* END GET DSM MATRIX  ********************************
@@ -70,15 +70,15 @@ Test_DSM_2; % enter name of DSM script file
 % **************************************************************************
 
 print_flag = 0;
-% extract_elements = [2];
-extract_elements = [2,5,7,8];
+extract_elements = [];
+% extract_elements = [2,5,7,8];
 
 Cluster_param.pow_cc				=	1;		% penalty assigned to cluster size(2)
 Cluster_param.pow_bid			=	1;		% high value penalizes large clusters (0-3, 2)
 Cluster_param.pow_dep			=	4;		% high value emphasizes high interactions (0-2, 2)
-Cluster_param.max_cluster_size=	8;	% max size of cluster (DSM size)
-Cluster_param.rand_accept		=	16;	% proceed w/ 1 of N changes even if no imp. (0.5-2 *DSM)
-Cluster_param.rand_bid			=	16;	% take second highest bid 1 out of N times (0.5-2 * DSM)
+Cluster_param.max_cluster_size=	5;	% max size of cluster (DSM size)
+Cluster_param.rand_accept		=	10;	% proceed w/ 1 of N changes even if no imp. (0.5-2 *DSM)
+Cluster_param.rand_bid			=	10;	% take second highest bid 1 out of N times (0.5-2 * DSM)
 Cluster_param.times				=	2;		% attept time*size before check sys. stability (2)
 Cluster_param.stable_limit		=	2;		% loop at least stable_limit*times*size (2)
 

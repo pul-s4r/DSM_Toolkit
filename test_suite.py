@@ -352,6 +352,56 @@ class ClusterTestCase(unittest.TestCase):
         assert np.equal(new_c.mat, new_c_result.mat).all()
         assert np.equal(new_c_size, new_c_size_result).all()
 
+    def test_delete_clusters_2(self):
+        c_mat = np.diag(np.ones([5]))
+        c_mat[1, 0] = 1
+        c = ClusterMatrix.from_mat(c_mat)
+
+        cg = ClusterGenerator(default_size=8)
+
+        # import pdb; pdb.set_trace()
+        new_c = cg.delete_clusters(c)
+        new_c_size = new_c.cluster_size
+        new_c_result_mat = np.array([
+            [1, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0],
+        ])
+
+        new_c_result = ClusterMatrix.from_mat(new_c_result_mat)
+        new_c_size_result = np.array([2,1,1,1,0])
+        assert np.equal(new_c.mat, new_c_result.mat).all()
+        assert np.equal(new_c_size, new_c_size_result).all()
+
+    def test_delete_clusters_3(self):
+        c_mat = np.array([
+            [1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ])
+        c = ClusterMatrix.from_mat(c_mat)
+
+        cg = ClusterGenerator(default_size=8)
+
+        new_c = cg.delete_clusters(c)
+        new_c_size = new_c.cluster_size
+        new_c_result_mat = np.array([
+            [1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ])
+
+        new_c_result = ClusterMatrix.from_mat(new_c_result_mat)
+        new_c_size_result = np.array([2,3,0,0,0])
+        assert np.equal(new_c.mat, new_c_result.mat).all()
+        assert np.equal(new_c_size, new_c_size_result).all()
+
     def test_cluster(self):
         d_mat = np.array([
             [1, 0, 1, 0, 0, 0, 0, 0],

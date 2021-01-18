@@ -214,27 +214,27 @@ class ClusterGenerator(object):
         new_cluster_mat = ClusterMatrix.from_mat(np.zeros([n_clusters, n_elements]))
         new_cluster_size = np.zeros([n_clusters])
 
+        # import pdb; pdb.set_trace()
+
         # If clusters are equal or cluster j is completely contained in i
         # Delete cluster j
-        for i in range(n_clusters):
-            for j in range(i+1, n_clusters):
-                if cluster_size[i] >= cluster_size[j] and cluster_size[j] > 0:
-                    if (np.logical_and(cluster_matrix.mat[i,:], \
-                        cluster_matrix.mat[j,:]) == cluster_matrix.mat[j,:]
-                        ).all():
-                        cluster_matrix.mat[j,:] = 0
-                        cluster_size[j] = 0
 
-        # If cluster i is completely contained in j
-        # Delete cluster i
-        for i in range(n_clusters):
-            for j in range(i+1, n_clusters):
-                if cluster_size[i] < cluster_size[j] and cluster_size[i] > 0:
-                    if (np.logical_and(cluster_matrix.mat[i,:], \
-                        cluster_matrix.mat[j,:]) == cluster_matrix.mat[i,:]
-                        ).all():
-                        cluster_matrix.mat[i,:] = 0
-                        cluster_size[i] = 0
+        ij_grid = [(i, j) for i in range(n_clusters) for j in range(i+1, n_clusters)]
+
+        for i, j in ij_grid:
+            if cluster_size[i] >= cluster_size[j] and cluster_size[j] > 0:
+                if (np.logical_and(cluster_matrix.mat[i,:], \
+                    cluster_matrix.mat[j,:]) == cluster_matrix.mat[j,:]).all():
+                    cluster_matrix.mat[j,:] = 0
+                    cluster_size[j] = 0
+
+        for i, j in ij_grid:
+            if cluster_size[i] < cluster_size[j] and cluster_size[j] > 0:
+                if (np.logical_and(cluster_matrix.mat[i,:], \
+                    cluster_matrix.mat[j,:]) == cluster_matrix.mat[i,:]
+                    ).all():
+                    cluster_matrix.mat[i,:] = 0
+                    cluster_size[i] = 0
 
         # Delete clusters with no tasks
         non_empty_cluster_index = np.array(cluster_size != 0)
