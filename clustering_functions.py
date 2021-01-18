@@ -258,7 +258,7 @@ class ClusterGenerator(object):
         coordination_cost = np.zeros([DSM_size, 1])
         cluster_size = np.zeros([DSM_size, 1])
         new_cluster_mat = ClusterMatrix.from_mat(np.zeros([n_clusters, n_clusters]))
-        new_cluster_size = np.zeros([DSM_size,1])
+        # new_cluster_size = np.zeros([DSM_size,1])
         cluster_bid = np.zeros([DSM_size,1])
         new_cluster_bid = np.zeros([DSM_size,1])
         new_coordination_cost = np.zeros([DSM_size,1])
@@ -269,7 +269,7 @@ class ClusterGenerator(object):
         cluster_diagonals = np.ones([1, self._n_clusters])
         cluster_mat = ClusterMatrix.from_mat(np.diag(cluster_diagonals.flatten()))
         cluster_mat.update_cluster_size()
-        cluster_size = np.ones([self._n_clusters, 1])
+        # cluster_size = np.ones([self._n_clusters, 1])
 
         # # Initial clustering starting cost
         total_coord_cost = ClusterGenerator._coord_cost(DSM_matrix, cluster_mat, self._params)
@@ -282,7 +282,7 @@ class ClusterGenerator(object):
         # # Store the best cluster matrix and corresponding cost and size
         best_curr_cost = total_coord_cost
         best_curr_cluster_mat = cluster_mat
-        best_curr_cluster_size = cluster_size
+        best_curr_cluster_size = cluster_mat.cluster_size
 
         # Initialise control parameters
         stable = 0;			#	toggle to indicate if the algorithm has met the stability criteria
@@ -307,9 +307,9 @@ class ClusterGenerator(object):
                 total_coord_cost_history.append(total_coord_cost)
                 total_coord_cost 	= best_curr_cost
                 cluster_mat 	= best_curr_cluster_mat.copy()
-                # cluster_mat.cluster_size = best_cluster_size.copy()
+                # cluster_mat.cluster_size = best_curr_cluster_size.copy()
                 # cluster_mat.update_cluster_size()
-                cluster_size 		= best_cluster_size.copy()
+                # cluster_size 		= best_curr_cluster_size.copy()
                 history_index 		= history_index+1
                 cost_history[history_index,0] = total_coord_cost
 
@@ -344,13 +344,12 @@ class ClusterGenerator(object):
 
                         # copy the cluster matrix into new matrices
                         new_cluster_mat = cluster_mat.copy()
-                        new_cluster_mat = cluster_mat.copy()
-                        new_cluster_size = cluster_size
+                        # new_cluster_size = cluster_size
 
                         # proceed with cluster changes in the new cluster
                         new_cluster_mat.mat[0:n_clusters, elmt] = np.logical_or(new_cluster_mat.mat[0:n_clusters, elmt].flatten(), cluster_list.flatten())
                         new_cluster_mat.update_cluster_size()
-                        new_cluster_size[0:n_clusters,0] = new_cluster_size[0:n_clusters,0] + (cluster_list == 1).flatten()*1
+                        # new_cluster_size[0:n_clusters,0] = new_cluster_size[0:n_clusters,0] + (cluster_list == 1).flatten()*1
 
                         # import pdb; pdb.set_trace()
                         # delete duplicate and empty clusters
@@ -374,7 +373,7 @@ class ClusterGenerator(object):
                                 if total_coord_cost < best_curr_cost:
                                     best_curr_cost = total_coord_cost
                                     best_curr_cluster_mat = cluster_mat
-                                    best_cluster_size = cluster_size
+                                    best_curr_cluster_size = cluster_mat.cluster_size
                                 else:
                                     accept1 = 0
 
@@ -384,7 +383,7 @@ class ClusterGenerator(object):
                         # Update the clusters
                         total_coord_cost = new_total_coord_cost
                         cluster_mat = new_cluster_mat.copy()
-                        cluster_size = new_cluster_size
+                        # cluster_size = new_cluster_size
                         history_index += 1
                         cost_history[history_index,0] = total_coord_cost
 
