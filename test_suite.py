@@ -196,7 +196,6 @@ class ClusterTestCase(unittest.TestCase):
 
         c_mat = np.diag(np.ones([8]))
         c = ClusterMatrix.from_mat(c_mat)
-        cluster_size = np.ones([8, 1])
         pow_cc = 1
 
         cg = ClusterGenerator(dsm_mat = d)
@@ -220,7 +219,6 @@ class ClusterTestCase(unittest.TestCase):
 
         c_mat = np.diag(np.ones([8]))
         c = ClusterMatrix.from_mat(c_mat)
-        cluster_size = np.ones([8, 1])
         pow_cc = 1
 
         # cg = ClusterGenerator(dsm_mat = d)
@@ -253,15 +251,6 @@ class ClusterTestCase(unittest.TestCase):
             [0., 0., 0., 0., 0., 0., 0., 0.]
           ])
         c = ClusterMatrix.from_mat(c_mat)
-        cluster_size = np.array([
-            [2.],
-            [1.],
-            [1.],
-            [1.],
-            [1.],
-            [1.],
-            [1.],
-            [0.]])
         pow_cc = 1
 
         cg = ClusterGenerator(dsm_mat = d)
@@ -286,7 +275,6 @@ class ClusterTestCase(unittest.TestCase):
         d = DSMMatrix(d_mat, activity_labels=d_list)
         c_mat = np.diag(np.ones([8]))
         c = ClusterMatrix.from_mat(c_mat)
-        cluster_size = np.ones([8, 1])
 
         cg = ClusterGenerator(
             dsm_mat = d)
