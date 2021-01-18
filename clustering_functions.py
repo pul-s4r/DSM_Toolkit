@@ -178,28 +178,26 @@ class ClusterGenerator(object):
 
         cluster_bid = np.zeros([n_clusters, 1])
 
-        # For each cluster, if any element in the cluster has an interaction with
-        # the selected element then add the number of interactions with the selected
-        # element. Then use the number of interactions to calculate the bid.
-        for i in range(n_clusters):
+        ie_i, ie_j = np.where(np.logical_and(cluster_matrix.mat, \
+            np.logical_and(~cluster_matrix.mat[elmt,:].astype(np.bool),
+            ~cluster_matrix.mat[:,elmt].astype(np.bool))\
+            ))
+
+        # # For each cluster, if any element in the cluster has an interaction with
+        # # the selected element then add the number of interactions with the selected
+        # # element. Then use the number of interactions to calculate the bid.
+        for i, j in zip(ie_i, ie_j):
             var_in = 0
             var_out = 0
-            # If element j is in cluster i, need j != element to avoid diagonal
-            for j in range(DSM_size):
-                if cluster_matrix.mat[i,j] == 1 and j != elmt:
-                    if DSM_matrix.mat[j, elmt] > 0:
-                        var_in += DSM_matrix.mat[j, elmt];
-                    if DSM_matrix.mat[elmt, j] > 0:
-                        var_out += DSM_matrix.mat[elmt, j]
+            if DSM_matrix.mat[j,elmt] > 0:
+                var_in += DSM_matrix.mat[j, elmt]
+            if DSM_matrix.mat[elmt,j] > 0:
+                var_out += DSM_matrix.mat[elmt, j]
 
-            # If there were any interactions with cluster members, make a bid
-            if var_in > 0 or var_out > 0:
-                # if cluster_size[i] == self._params.max_cluster_size:
-                if cluster_matrix.cluster_size[i] == self._params.max_cluster_size:
-                    cluster_bid[i] = 0
-                else:
-                    cluster_bid[i] = ( (var_in+var_out)**self._params.pow_dep \
-                        /(cluster_matrix.cluster_size[i]**self._params.pow_bid) )
+            if cluster_matrix.cluster_size[i] != self._params.max_cluster_size\
+                and (var_in > 0 or var_out > 0):
+                cluster_bid[i] = ( (var_in+var_out)**self._params.pow_dep \
+                    /(cluster_matrix.cluster_size[i]**self._params.pow_bid))
 
         return cluster_bid
 

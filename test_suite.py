@@ -322,7 +322,7 @@ class ClusterTestCase(unittest.TestCase):
 
         elmt = 0
         cluster_bid_2 = cg2._make_bid(elmt, d, c)
-        # print(cluster_bid_2)
+        # print("CB2: ", cluster_bid_2)
         assert np.equal(cluster_bid_2, np.array([[0],[0],[16],[1],[0],[0],[0],[0]])).all()
 
     def test_delete_clusters(self):
