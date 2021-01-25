@@ -1,4 +1,6 @@
-from dsm_helper_classes import *
+from ClusterParameters import ClusterParameters, set_default_cluster_parameters
+from ClusterMatrix import ClusterMatrix
+from DSMMatrix import DSMMatrix
 from clustering_functions import *
 from plotting_functions import *
 

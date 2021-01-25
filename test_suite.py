@@ -4,7 +4,9 @@ import unittest
 import pdb, traceback, sys
 
 from clustering_functions import *
-from dsm_helper_classes import *
+from ClusterParameters import ClusterParameters, set_default_cluster_parameters
+from ClusterMatrix import ClusterMatrix
+from DSMMatrix import DSMMatrix
 from plotting_functions import *
 
 # Test case for DSMMatrix.reorder_by_cluster
