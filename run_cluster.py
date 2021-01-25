@@ -1,6 +1,6 @@
-from ClusterParameters import ClusterParameters, set_default_cluster_parameters
-from ClusterMatrix import ClusterMatrix
-from DSMMatrix import DSMMatrix
+from cluster_parameters import ClusterParameters, set_default_cluster_parameters
+from cluster_matrix import ClusterMatrix
+from dsm_matrix import DSMMatrix
 from clustering_functions import *
 from plotting_functions import *
 

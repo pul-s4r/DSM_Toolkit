@@ -1,12 +1,12 @@
 """
     DSMMatrix describes interactions between two tasks
     i.e. whether one task depends on the input/output of another.
-    If there is such an interaction the tasks are considered coupled. 
+    If there is such an interaction the tasks are considered coupled.
 """
 from collections import Counter
 import copy
 import numpy as np
-from ClusterMatrix import ClusterMatrix
+from cluster_matrix import ClusterMatrix
 
 class DSMMatrix(object):
     """ Lists activities in act_labels and dependencies in mat (2-d matrix)
