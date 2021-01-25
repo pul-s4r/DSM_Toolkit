@@ -27,36 +27,16 @@ class ClusterGenerator(object):
         # Initialise matrices and arrays
         self._DSM_size = self._dsm_mat.mat.shape[1]
         self._n_clusters = max_size
-        self._max_repeat = 10
-
-        _dsm_rowvector = np.zeros([self._DSM_size, 1])
-        # self._coordination_cost = np.copy(_dsm_rowvector)
-        self._cluster_size = np.copy(_dsm_rowvector)
-        self._new_cluster_mat = np.zeros([self._DSM_size, self._DSM_size])
-        self._new_cluster_size = np.copy(_dsm_rowvector)
-        self._cluster_bid = np.copy(_dsm_rowvector)
-        self._new_cluster_bid = np.copy(_dsm_rowvector)
-        # self._new_coordination_cost = np.copy(_dsm_rowvector)
-        # self._rnd_elem_array = np.copy(_dsm_rowvector)
-        self._cluster_list = np.copy(_dsm_rowvector)
-
-        # Initialise cluster matrix along diagonals
-        # Initial condition: nth cluster contains nth element
-        self._cluster_diagonals = np.ones([1, self._n_clusters])
-        self._cluster_mat = ClusterMatrix.from_mat(np.diag(self._cluster_diagonals.flatten()))
-        self._cluster_size = np.ones([self._n_clusters, 1])
-
-        # Calculate initial starting condition
-        self._total_coord_cost = ClusterGenerator._coord_cost(self._dsm_mat, self._cluster_mat, self._params)
-        self._best_coord_cost = self._total_coord_cost
 
         self._cost_history = np.zeros([10000, 1])
         self._history_index = 0
+        self._cluster_matrix_history = []
+        self._cluster_size_history = []
+        self._total_coord_cost_history = []
+        self._cost_history = np.array([])
+        self._total_coord_cost = 0
+        self._cluster_result =  ClusterMatrix.from_mat(np.zeros([max_size, max_size]))
 
-        # Store the best cluster matrix and corresponding cost and size
-        self._best_curr_cost = self._total_coord_cost
-        self._best_curr_cluster_mat = self._cluster_mat
-        self._best_curr_cluster_size = self._cluster_size
 
     @property
     def dsm(self):
@@ -80,6 +60,18 @@ class ClusterGenerator(object):
         assert isinstance(param_object, ClusterParameters)
         assert param_object.max_cluster_size >= self._dsm_mat.mat.shape[0]
         self._params = param_object
+
+    @property
+    def cost_history(self):
+        return self._cost_history
+
+    @property
+    def total_coord_cost(self):
+        return self._total_coord_cost
+
+    @property
+    def cluster_result(self):
+        return self._cluster_result
 
     @staticmethod
     def _coord_cost(DSM_matrix, cluster_matrix, params):
@@ -276,7 +268,8 @@ class ClusterGenerator(object):
         best_coord_cost = total_coord_cost
 
         # # Initialise cost history
-        cost_history = np.zeros([10000, 1])
+        cost_history = []
+        # cost_history = np.zeros([10000, 1])
         history_index = 0
 
         # # Store the best cluster matrix and corresponding cost and size
@@ -292,26 +285,27 @@ class ClusterGenerator(object):
         attempt = 0;		#	index to count the number of passes through the algorithm
 
         # Initialise best cost history
-        cluster_matrix_history = []
-        cluster_size_history = []
-        total_coord_cost_history = []
-        cluster_matrix_history.append(cluster_mat)
-        cluster_size_history.append(cluster_size)
-        total_coord_cost_history.append(total_coord_cost)
+        self._cluster_matrix_history = []
+        self._cluster_size_history = []
+        self._total_coord_cost_history = []
+        self._cluster_matrix_history.append(cluster_mat)
+        self._cluster_size_history.append(cluster_size)
+        self._total_coord_cost_history.append(total_coord_cost)
 
         # import pdb; pdb.set_trace()
         while total_coord_cost > best_coord_cost and attempt <= max_repeat or first_run == 1:
             if first_run == 0:
-                cluster_matrix_history.append(cluster_mat)
-                cluster_size_history.append(cluster_size)
-                total_coord_cost_history.append(total_coord_cost)
+                self._cluster_matrix_history.append(cluster_mat)
+                self._cluster_size_history.append(cluster_size)
+                self._total_coord_cost_history.append(total_coord_cost)
                 total_coord_cost 	= best_curr_cost
                 cluster_mat 	= best_curr_cluster_mat.copy()
                 # cluster_mat.cluster_size = best_curr_cluster_size.copy()
                 # cluster_mat.update_cluster_size()
                 # cluster_size 		= best_curr_cluster_size.copy()
                 history_index 		= history_index+1
-                cost_history[history_index,0] = total_coord_cost
+                # cost_history[history_index,0] = total_coord_cost
+                cost_history.append(total_coord_cost)
 
             first_run = 0
             stable = 0
@@ -385,7 +379,8 @@ class ClusterGenerator(object):
                         cluster_mat = new_cluster_mat.copy()
                         # cluster_size = new_cluster_size
                         history_index += 1
-                        cost_history[history_index,0] = total_coord_cost
+                        # cost_history[history_index,0] = total_coord_cost
+                        cost_history.append(total_coord_cost)
 
                         if (best_coord_cost > total_coord_cost):
                             best_coord_cost = total_coord_cost
@@ -402,7 +397,10 @@ class ClusterGenerator(object):
 
                 attempt += 1
             pass
-        return (cluster_mat, total_coord_cost, cost_history)
+        self._cluster_result = cluster_mat
+        self._cost_history = np.array(cost_history)
+        self._total_coord_cost = total_coord_cost
+        return cluster_mat
 
 
         pass

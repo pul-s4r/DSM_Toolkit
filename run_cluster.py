@@ -54,7 +54,9 @@ if __name__ == "__main__":
     cg = ClusterGenerator(dsm_mat = d)
     cg.params = cparams
 
-    (c_orig, total_coord_cost, cost_history) = cg.cluster(d)
+    c_orig = cg.cluster(d)
+    total_coord_cost = cg.total_coord_cost
+    cost_history = cg.cost_history
     c = ClusterMatrix.reorder(c_orig)
 
     # import pdb; pdb.set_trace()

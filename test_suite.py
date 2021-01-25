@@ -421,7 +421,9 @@ class ClusterTestCase(unittest.TestCase):
         cg = ClusterGenerator(default_size=8)
 
         # try:
-        (cluster_matrix, total_coord_cost, cost_history) = cg.cluster(d)
+        cluster_matrix = cg.cluster(d)        
+        total_coord_cost = cg.total_coord_cost
+        cost_history = cg.cost_history
         # except:
         #     extype, value, tb = sys.exc_info()
         #     traceback.print_exc()
