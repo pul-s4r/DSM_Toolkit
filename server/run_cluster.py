@@ -65,6 +65,8 @@ if __name__ == "__main__":
     d_g = DSMMatrix.place_diag(d_orig)
     d_new_g = DSMMatrix.place_diag(d_new)
 
+    print(d_new_g); 
+
     graph_matrix(d_g, cluster_matrix=None,
         x_title='Element', y_title='Element', graph_title='DSM Matrix (Original)',
         x_tcklabel=None, y_tcklabel=None, print_flag=0)

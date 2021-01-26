@@ -6,6 +6,7 @@
 from collections import Counter
 import copy
 import numpy as np
+import json
 from cluster_matrix import ClusterMatrix
 
 class DSMMatrix(object):
@@ -23,7 +24,8 @@ class DSMMatrix(object):
         self._system_elements = [];
         if activity_labels:
             assert len(activity_labels) == mat.shape[0], "Labels must match matrix"
-            self._labels = activity_labels
+            # self._labels = activity_labels
+            self._labels = [str(a) for a in activity_labels]
         else:
             self._labels = self._make_labels()
 
@@ -31,14 +33,14 @@ class DSMMatrix(object):
         return str(self._mat)
 
     def __str__(self):
-        return "DSMMatrix(" + self._mat + ")"
+        return "DSMMatrix(" + str(self._mat) + ")"
 
     @classmethod
     def from_size(cls, size):
         """ Alternate constructor for DSM matrix creating a blank matrix of given size and act_labels with all "None" values
         """
         mat = np.zeros([size, size])
-        act_labels = [None for _ in range(size)]
+        act_labels = [str(x+1) for x in range(size)]
         return cls(mat, act_labels)
 
     def __repr__(self):
@@ -78,6 +80,12 @@ class DSMMatrix(object):
         for i in elems:
             self._mat[i,:] = 0
             self._mat[:,i] = 0
+
+    def tolist(self):
+        return self._mat.tolist()
+
+    def tojson(self):
+        return json.dumps(self._mat.tolist())
 
     @property
     def labels(self):

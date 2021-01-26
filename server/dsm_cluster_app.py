@@ -1,5 +1,6 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 
+import sys
 import json
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -24,7 +25,7 @@ class ParamItem(BaseModel):
 class DSMItem(BaseModel):
     mat: Optional[List[List[int]]] = [
         [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], ]
-    labels: List[int]
+    labels: List[Any]
     system_elements: List[int]
 
 class GeneratorState():
@@ -43,6 +44,11 @@ class GeneratorState():
 
         self.dsm = DSMMatrix.from_size(4)
 
+        self.dsm_result = None
+        self.cluster_result = None
+
+        self.generator = None
+
 app = FastAPI()
 
 app_state = GeneratorState()
@@ -57,11 +63,23 @@ async def create_example():
 
 @app.post("/new_dsm/")
 async def new_dsm(dsm_item: DSMItem):
+    d_mat = np.array(dsm_item.mat)
+    labels = dsm_item.labels
+    system_elements = dsm_item.system_elements
+
+    try:
+        d = DSMMatrix(d_mat, activity_labels = labels)
+        d.clear_elements(system_elements)
+        app_state.dsm = d
+    except AssertionError as err:
+        return {"result": "AssertionError: " + str(err)}
+    except:
+        return {"result": "Unexpected error: " + str(sys.exc_info()[0])}
+
     return dsm_item
 
 @app.post("/params/set")
 async def set_params(param_item: ParamItem):
-    import pdb; pdb.set_trace()
     new_params_set = ClusterParameters(
         pow_cc = int(param_item.pow_cc),
         pow_bid = int(param_item.pow_bid),
@@ -76,21 +94,30 @@ async def set_params(param_item: ParamItem):
 
     app_state.params = new_params_set
 
-    # app_state.params.pow_cc = int(param_item.pow_cc)
-    # app_state.params.pow_bid = int(param_item.pow_bid)
-    # app_state.params.pow_dep = int(param_item.pow_dep)
-    # app_state.params.max_cluster_size = int(param_item.max_cluster_size)
-    # app_state.params.rand_accept = int(param_item.rand_accept)
-    # app_state.params.rand_bid = int(param_item.rand_bid)
-    # app_state.params.times = int(param_item.times)
-    # app_state.params.stable_limit = int(param_item.stable_limit)
-    # app_state.params.max_repeat = int(param_item.max_repeat)
-
     return {"result": "success"}
+
+@app.get("/cluster/")
+async def do_cluster():
+    app_state.generator = ClusterGenerator(dsm_mat = app_state.dsm)
+    c_orig = app_state.generator.cluster(app_state.dsm)
+    total_coord_cost = app_state.generator.total_coord_cost
+    cost_history = app_state.generator.cost_history
+    c = ClusterMatrix.reorder(c_orig)
+
+    new_dsm = DSMMatrix.reorder_by_cluster(app_state.dsm, c)
+
+    d_new_g = DSMMatrix.place_diag(new_dsm)
+    app_state.cluster_result = c
+    app_state.dsm_result = d_new_g
+
+    return {
+        "dsm": app_state.dsm_result.tojson(),
+        "labels": app_state.dsm_result.labels,
+        "cluster": app_state.cluster_result.tojson(),
+    }
 
 @app.get("/params/get")
 async def get_params():
-    import pdb; pdb.set_trace()
     return ParamItem(
         pow_cc = int(app_state.params.pow_cc),
         pow_bid = int(app_state.params.pow_bid),
@@ -101,20 +128,32 @@ async def get_params():
         times = int(app_state.params.times),
         stable_limit = int(app_state.params.stable_limit),
         max_repeat = int(app_state.params.max_repeat)
-    ) if app_state.params else { 'result': 'error' }
+    ) if app_state.params else { "result": "error" }
 
 @app.get("/result/cluster")
 async def get_result_cluster():
-    return {}
+    return {
+        "mat": app_state.cluster_result.tojson()
+            if app_state.cluster_result else [],
+    }
 
 @app.get("/result/dsm")
 async def get_result_dsm():
-    return {}
+    return {
+        "mat": app_state.dsm.tojson(),
+        "labels": app_state.dsm.labels,
+        "system_elements": [],
+    }
 
 @app.get("/orig/cluster")
 async def get_orig_cluster():
-    return {}
+    return {
+        "mat": [],
+    }
 
 @app.get("/orig/cluster")
 async def get_orig_dsm():
-    return {}
+    return {
+        "mat": app_state.dsm.tojson(),
+        "labels": app_state.dsm.labels,
+    }

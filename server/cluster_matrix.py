@@ -3,6 +3,7 @@
 """
 
 import copy
+import json
 import numpy as np
 
 class ClusterMatrix(object):
@@ -51,6 +52,12 @@ class ClusterMatrix(object):
     @property
     def num_activities(self):
         return self._num_activities
+
+    def tolist(self):
+        return self._mat.tolist()
+
+    def tojson(self):
+        return json.dumps(self._mat.tolist())
 
     def update_cluster_size(self):
         """ Updates the cluster_size array to reflect changes in mat
