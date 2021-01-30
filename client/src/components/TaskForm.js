@@ -3,11 +3,16 @@ import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.css';
 
 const TaskForm = ({
+  currentId,
   setCurrentId,
+  editMode,
+  setEditMode,
   createTask,
   availableInTasks,
   availableOutTasks,
   addTask,
+  editTask,
+  data
 }) => {
   const [formData, setFormData] = useState({
       name: "",
@@ -19,8 +24,15 @@ const TaskForm = ({
   const [currTaskOutput, setCurrTaskOutput] = useState(0);
 
   useEffect(() => {
-
-  }, [])
+    if(editMode === 1) {
+      // console.log("Edit: ", editMode, ", Current ID:", currentId);
+      let entry = data.find((n) => n.id == currentId);
+      console.log("Finding: ", entry);
+      setFormData({name: entry.name, desc: entry.desc});
+      updateTaskInputs(entry.tasks_in);
+      updateTaskOutputs(entry.tasks_out);
+    }
+  }, [editMode, currentId])
 
   const handleSubmit = () => {
     console.log("Data: ", formData);
@@ -28,14 +40,18 @@ const TaskForm = ({
     console.log("Outs: ", taskOutputs);
 
     // addTask(data);
-    addTask(formData.name, taskInputs, taskOutputs, formData.desc);
+    if (editMode === 1) {
+      editTask(formData.name, taskInputs, taskOutputs, formData.desc);
+    } else {
+      addTask(formData.name, taskInputs, taskOutputs, formData.desc);
+    }
     clear();
   }
 
   const handleAddTaskInput = (val) => {
     let val_int = parseInt(val);
     console.log("id to add: ", val);
-    if(val && val_int !== NaN && !taskInputs.includes(val_int)) {
+    if(val && !isNaN(val_int) && !taskInputs.includes(val_int)) {
       updateTaskInputs(taskInputs => [...taskInputs, val_int]);
       console.log("Added in: ", val);
     }
@@ -50,7 +66,7 @@ const TaskForm = ({
 
   const handleAddTaskOutput = (val) => {
     let val_int = parseInt(val);
-    if (val && val_int !== NaN && !taskOutputs.includes(val_int)) {
+    if (val && !isNaN(val_int) && !taskOutputs.includes(val_int)) {
       updateTaskOutputs(taskOutputs => [...taskOutputs, val_int]);
       console.log("Added out: ", val);
     }
@@ -64,7 +80,7 @@ const TaskForm = ({
   }
 
   const clear = () => {
-    // setCurrentId(0);
+    setCurrentId(0);
     setFormData({
         name: "",
         desc: "",

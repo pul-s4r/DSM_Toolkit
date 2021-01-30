@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 
-const TaskList = ({ data, handleDelete }) => {
+const TaskList = ({ setCurrentId, setEditMode, data, handleDelete }) => {
   // const [taskData, setTaskData] = useState();
 
   // const { data } = props.data;
@@ -37,7 +37,10 @@ const TaskList = ({ data, handleDelete }) => {
                 <td>
                   <button
                     className="btn btn-primary btn-sm m-2"
-
+                    onClick={() => {
+                      setEditMode(1);
+                      setCurrentId(task.id);
+                    }}
                   >
                     Edit
                   </button>

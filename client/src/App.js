@@ -11,15 +11,20 @@ const App = () => {
     // { id: 3, seq: 3, name: "Task 3", tasks_in: ["1", "2"], tasks_out: [], desc: "Task 3" },
   ]);
 
-  let [idCount, setIdCount] = useState(1);
+  const [idCount, setIdCount] = useState(1);
   const [seqCount, setSeqCount] = useState(1);
+  const [currentId, setCurrentId] = useState(0);
+  const [editMode, setEditMode] = useState(0);
 
-  const handleAddTask = (task_name, l_tasks_in, l_tasks_out, task_desc) => {
+  const handleAddOrChangeTask = async (task_name, l_tasks_in, l_tasks_out, task_desc, change_mode, ch_id) => {
     console.log("Task received: ", task_name, l_tasks_in,
       l_tasks_out, task_desc);
+    let task_id = change_mode ? currentId : idCount;
+    let task_seq = change_mode ? taskData.filter((e) => e.id === currentId)[0].seq
+                    : seqCount;
     let entry = {
-      id: idCount,
-      seq: seqCount,
+      id: task_id,
+      seq: task_seq,
       name: task_name,
       tasks_in: l_tasks_in,
       tasks_out: l_tasks_out,
@@ -46,10 +51,26 @@ const App = () => {
         exist_tasks[fj] = entries_ch[j];
       }
     }
-    setTaskData(taskData => [...exist_tasks, entry]);
+    if (change_mode === 1 && ch_id) {
+      let i_change = exist_tasks.findIndex(x => x.id === ch_id);
+      exist_tasks[i_change] = entry;
+      await setTaskData(taskData => [...exist_tasks]);
+      console.log("(Change) Id: ", idCount, "Seq: ", seqCount);
+    } else {
+      await setTaskData(taskData => [...exist_tasks, entry]);
+      console.log("(Add) Id: ", idCount, "Seq: ", seqCount);
+    }
+  }
+
+  const handleAddTask = async (task_name, l_tasks_in, l_tasks_out, task_desc) => {
+    await handleAddOrChangeTask(task_name, l_tasks_in, l_tasks_out, task_desc, 0, currentId);
     setIdCount(idCount + 1);
     setSeqCount(seqCount + 1);
-    console.log("(Add) Id: ", idCount, "Seq: ", seqCount);
+  }
+
+  const handleChangeTask = async (task_name, l_tasks_in, l_tasks_out, task_desc) => {
+    handleAddOrChangeTask(task_name, l_tasks_in, l_tasks_out, task_desc, 1, currentId);
+    setEditMode(0);
   }
 
   const handleDelete = (id) => {
@@ -86,13 +107,21 @@ const App = () => {
   return (
     <div className="App">
       <TaskList
+        setCurrentId={setCurrentId}
+        setEditMode={setEditMode}
         data={taskData}
         handleDelete={handleDelete}
       />
       <TaskForm
+        currentId={currentId}
+        setCurrentId={setCurrentId}
+        editMode={editMode}
+        setEditMode={setEditMode}
         addTask={handleAddTask}
+        editTask={handleChangeTask}
         availableInTasks={taskData.map((task) => task.id)}
         availableOutTasks={taskData.map((task) => task.id)}
+        data={taskData}
       />
 
     </div>
