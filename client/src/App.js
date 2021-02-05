@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 // import './App.css';
 
+import usePersistedState from './usePersistedState.js';
 import TaskList from './components/TaskList.js';
 import TaskForm from './components/TaskForm.js';
 
 const App = () => {
-  const [taskData, setTaskData] = useState([
+  // const [taskData, setTaskData] = useState([
     // { id: 1, seq: 1, name: "Task 1", tasks_in: [], tasks_out: ["2", "3"], desc: "Task 1" },
     // { id: 2, seq: 2, name: "Task 2", tasks_in: ["1"], tasks_out: ["3"], desc: "Task 2" },
     // { id: 3, seq: 3, name: "Task 3", tasks_in: ["1", "2"], tasks_out: [], desc: "Task 3" },
-  ]);
+  // ]);
 
-  const [idCount, setIdCount] = useState(1);
-  const [seqCount, setSeqCount] = useState(1);
-  const [currentId, setCurrentId] = useState(0);
-  const [editMode, setEditMode] = useState(0);
+  const [taskData, setTaskData] = usePersistedState("taskData", [])
+
+  const [idCount, setIdCount] = usePersistedState("idCount", 1);
+  const [seqCount, setSeqCount] = usePersistedState("seqCount", 1);
+  const [currentId, setCurrentId] = usePersistedState("currentId", 0);
+  const [editMode, setEditMode] = usePersistedState("editMode", 0);
 
   const handleAddOrChangeTask = async (task_name, l_tasks_in, l_tasks_out, task_desc, change_mode, ch_id) => {
     console.log("Task received: ", task_name, l_tasks_in,
@@ -103,6 +106,14 @@ const App = () => {
     console.log("(Delete) Id: ", idCount, "Seq: ", seqCount);
   }
 
+  const clear = () => {
+    setTaskData([]);
+    setIdCount(1);
+    setSeqCount(1);
+    setCurrentId(0);
+    setEditMode(0);
+  }
+
 
   return (
     <div className="App">
@@ -111,6 +122,7 @@ const App = () => {
         setEditMode={setEditMode}
         data={taskData}
         handleDelete={handleDelete}
+        handleClear={clear}
       />
       <TaskForm
         currentId={currentId}

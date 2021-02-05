@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import 'bootstrap/dist/css/bootstrap.css';
+import './styles.css'
 
 const TaskForm = ({
   currentId,
@@ -26,13 +27,13 @@ const TaskForm = ({
   useEffect(() => {
     if(editMode === 1) {
       // console.log("Edit: ", editMode, ", Current ID:", currentId);
-      let entry = data.find((n) => n.id == currentId);
+      let entry = data.find((n) => n.id === currentId);
       console.log("Finding: ", entry);
       setFormData({name: entry.name, desc: entry.desc});
       updateTaskInputs(entry.tasks_in);
       updateTaskOutputs(entry.tasks_out);
     }
-  }, [editMode, currentId])
+  }, [editMode, currentId, data])
 
   const handleSubmit = () => {
     console.log("Data: ", formData);
@@ -92,114 +93,152 @@ const TaskForm = ({
   }
 
   return(
-    <form>
-      <div class="form-group row">
-        <label for="inputTaskName"
-          class="col-sm-2 col-form-label">
-          Task Name
-        </label>
-        <div class="col-sm-10">
-          <input
-            class="form-control"
-            id="inputTaskName"
-            placeholder="Task Name"
-            value={formData.name}
-            onChange={(e) => setFormData({... formData, name: e.target.value})}/>
+    <div class="container">
+      <h2>Add Task</h2>
+      <form>
+        <div class="form-group row form_elem_p">
+          <label for="inputTaskName"
+            class="col-sm-2 col-form-label">
+            Task Name
+          </label>
+          <div class="col-sm-10">
+            <input
+              class="form-control"
+              id="inputTaskName"
+              placeholder="Task Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
         </div>
-      </div>
-      <div class="form-group row">
-        <label for="inputTaskDesc"
-          class="col-sm-2 col-form-label">
-          Description
-        </label>
-        <div class="col-sm-10">
-          <input
-            class="form-control"
-            id="inputTaskDesc"
-            placeholder="Description"
-            value={formData.desc}
-            onChange={(e) => setFormData({... formData, desc: e.target.value})}/>
+        <div class="form-group row form_elem_p">
+          <label for="inputTaskDesc"
+            class="col-sm-2 col-form-label margin-bottom">
+            Description
+          </label>
+          <div class="col-sm-10">
+            <input
+              class="form-control"
+              id="inputTaskDesc"
+              placeholder="Description"
+              value={formData.desc}
+              onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="taskInputChoices">Add task input</label>
-        <select class="form-control"
-          id="taskInputChoices"
-          onClick={(e) => setCurrTaskInput(e.target.value)}
-          onChange={(e) => setCurrTaskInput(e.target.value)}
-        >
-          {
-            availableInTasks ?
-              availableInTasks.filter(n => !taskInputs.includes(n))
-              .map((t) => (
-              <option>{t}</option>
-            )) : <option></option>
-          }
-        </select>
-        <div class="input-group-append">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            id="button-addon2"
-            onClick={() => handleAddTaskInput(currTaskInput)}
-          >Add</button>
+        <div class="form-group row form_elem_p">
+          <div class="col-sm-2 col-form-label">
+            <label for="taskInputChoices">Add task input</label>
+          </div>
+          <div class="col-sm-2">
+            <select class="form-control"
+              id="taskInputChoices"
+              onClick={(e) => setCurrTaskInput(e.target.value)}
+              onChange={(e) => setCurrTaskInput(e.target.value)}
+            >
+              {
+                availableInTasks ?
+                  availableInTasks.filter(n => !taskInputs.includes(n))
+                  .map((t) => (
+                  <option>{t}</option>
+                )) : <option></option>
+              }
+            </select>
+          </div>
+          <div class="col-sm-1">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              id="button-addon2"
+              onClick={() => handleAddTaskInput(currTaskInput)}
+            >
+            Add</button>
+          </div>
+          <div class="col-sm-7">
+            { taskInputs ? taskInputs.map((t) =>
+              <span>
+                <span className="badge bg-secondary">
+                  In {t} &nbsp;
+                  <button type="button" class="btn btn-dark btn-sm"
+                    onClick={() => handleDeleteTaskInput(t)}>
+                    <span>&times;</span>
+                  </button>
+                </span>
+                <span>&nbsp;</span>
+              </span>
+            ) : <span>No inputs</span> }
+          </div>
         </div>
-        <div>
-          { taskInputs ? taskInputs.map((t) =>
-            <span className="badge bg-secondary">
-              In {t} &nbsp;
-              <button type="button" class="btn btn-dark btn-sm"
-                onClick={() => handleDeleteTaskInput(t)}>
-                <span>&times;</span>
-              </button>
-            </span>
-          ) : <span>No inputs</span> }
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label for="taskInputChoices">Add task output</label>
-        <select class="form-control"
-          id="taskInputChoices"
-          onClick={(e) => setCurrTaskOutput(e.target.value)}
-        >
-          {
-            availableOutTasks ?
-              availableOutTasks.filter(n => !taskOutputs.includes(n))
-              .map((t) => (
-              <option>{t}</option>
-            )) : <option></option>
-          }
-        </select>
-        <div class="input-group-append">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            id="button-addon2"
-            onClick={() => handleAddTaskOutput(currTaskOutput)}
-          >Add</button>
+        <div class="form-group row form_elem_p">
+          <div class="col-sm-2 col-form-label">
+            <label for="taskInputChoices">Add task output</label>
+          </div>
+          <div class="col-sm-2">
+            <select class="form-control"
+              id="taskInputChoices"
+              onClick={(e) => setCurrTaskOutput(e.target.value)}
+            >
+              {
+                availableOutTasks ?
+                  availableOutTasks.filter(n => !taskOutputs.includes(n))
+                  .map((t) => (
+                  <option>{t}</option>
+                )) : <option></option>
+              }
+            </select>
+          </div>
+          <div class="col-sm-1 input-group-append">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              id="button-addon2"
+              onClick={() => handleAddTaskOutput(currTaskOutput)}
+            >Add</button>
+          </div>
+          <div class="col-sm-7">
+            { taskOutputs ? taskOutputs.map((t) =>
+              <span>
+                <span className="badge bg-secondary">
+                  Out {t} &nbsp;
+                  <button type="button" class="btn btn-dark btn-sm"
+                    onClick={() => handleDeleteTaskOutput(t)}>
+                    <span>&times;</span>
+                  </button>
+                </span>
+                <span>&nbsp;</span>
+              </span>
+            ) : <span>No outputs</span> }
+          </div>
         </div>
-        <div>
-          { taskOutputs ? taskOutputs.map((t) =>
-            <span className="badge bg-secondary">
-              Out {t} &nbsp;
-              <button type="button" class="btn btn-dark btn-sm"
-                onClick={() => handleDeleteTaskOutput(t)}>
-                <span>&times;</span>
-              </button>
-            </span>
-          ) : <span>No outputs</span> }
+        <div class="row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-3">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={() => handleSubmit()}
+            >
+              Add Task
+            </button>
+            <span>&nbsp;</span>
+            <button
+              type="button"
+              class="btn btn-danger"
+              onClick={() => clear()}
+              >
+              Clear
+            </button>
+          </div>
+          <div class="col-sm-1">
+          </div>
+
         </div>
-      </div>
-      <button
-        type="button"
-        class="btn btn-primary"
-        onClick={() => handleSubmit()}
-      >
-        Add Task
-      </button>
-    </form>
+      </form>
+  </div>
+
   );
 }
 
