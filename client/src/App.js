@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // import './App.css';
+import { strict as assert } from 'assert';
 
 import usePersistedState from './usePersistedState.js';
 import TaskList from './components/TaskList.js';
@@ -39,15 +40,18 @@ const App = () => {
     for (let i = 0; i < l_tasks_in.length; i++) {
       let entries_ch = exist_tasks.filter(entry => entry.id === l_tasks_in[i]);
       for (let j = 0; j < entries_ch.length; j++) {
+        if (entries_ch[j].tasks_out.includes(entry.id)) { continue; }
         let new_outs = [... entries_ch[j].tasks_out, entry.id];
         entries_ch[j].tasks_out = new_outs;
         let fj = exist_tasks.findIndex(x => x.id === entries_ch[j].id);
         exist_tasks[fj] = entries_ch[j];
       }
     }
+    // Add all outputs as inputs for the listed tasks
     for (let i = 0; i < l_tasks_out.length; i++) {
       let entries_ch = exist_tasks.filter(entry => entry.id === l_tasks_out[i]);
       for (let j = 0; j < entries_ch.length; j++) {
+        if (entries_ch[j].tasks_in.includes(entry.id)) { continue; }
         let new_ins = [... entries_ch[j].tasks_in, entry.id];
         entries_ch[j].tasks_in = new_ins;
         let fj = exist_tasks.findIndex(x => x.id === entries_ch[j].id);
@@ -114,6 +118,29 @@ const App = () => {
     setEditMode(0);
   }
 
+  const toDSM = (taskList) => {
+    assert(Array.isArray(taskList));
+    var lt = taskList.length;
+    var dsm = Array(lt).fill(0).map(() => Array(lt).fill(0));
+    var labels = taskList.map(t => t.name ? t.name : t.id);
+
+    for (const id in taskList) {
+      let seq = taskList[id].seq-1;
+      for (const ti in taskList[id].tasks_in) {
+        let inp = taskList[id].tasks_in[ti]-1;
+        dsm[seq][inp] = 1; 
+      }
+    }
+
+    return {dsm: dsm, labels: labels};
+  }
+
+  const handleSubmit = () => {
+    var dsm_obj = toDSM(taskData);
+    console.log("DSM: ", dsm_obj.dsm);
+    console.log("Labels: ", dsm_obj.labels);
+  }
+
 
   return (
     <div className="App">
@@ -121,6 +148,7 @@ const App = () => {
         setCurrentId={setCurrentId}
         setEditMode={setEditMode}
         data={taskData}
+        handleSubmit={handleSubmit}
         handleDelete={handleDelete}
         handleClear={clear}
       />

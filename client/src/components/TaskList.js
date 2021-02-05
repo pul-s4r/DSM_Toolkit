@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 
-const TaskList = ({ setCurrentId, setEditMode, data, handleDelete, handleClear }) => {
+const TaskList = ({ setCurrentId, setEditMode, data, handleSubmit,
+  handleDelete, handleClear }) => {
   // const [taskData, setTaskData] = useState();
 
   // const { data } = props.data;
@@ -17,6 +18,7 @@ const TaskList = ({ setCurrentId, setEditMode, data, handleDelete, handleClear }
         class="btn btn-primary"
         href="#"
         role="button"
+        onClick={() => handleSubmit()}
       >
         Cluster
       </button>
