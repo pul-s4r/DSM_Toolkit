@@ -93,17 +93,17 @@ const TaskForm = ({
   }
 
   return(
-    <div class="container">
+    <div className="container">
       <h2>Add Task</h2>
       <form>
-        <div class="form-group row form_elem_p">
-          <label for="inputTaskName"
-            class="col-sm-2 col-form-label">
+        <div className="form-group row form_elem_p">
+          <label htmlFor="inputTaskName"
+            className="col-sm-2 col-form-label">
             Task Name
           </label>
-          <div class="col-sm-10">
+          <div className="col-sm-10">
             <input
-              class="form-control"
+              className="form-control"
               id="inputTaskName"
               placeholder="Task Name"
               value={formData.name}
@@ -111,14 +111,14 @@ const TaskForm = ({
             />
           </div>
         </div>
-        <div class="form-group row form_elem_p">
-          <label for="inputTaskDesc"
-            class="col-sm-2 col-form-label margin-bottom">
+        <div className="form-group row form_elem_p">
+          <label htmlFor="inputTaskDesc"
+            className="col-sm-2 col-form-label margin-bottom">
             Description
           </label>
-          <div class="col-sm-10">
+          <div className="col-sm-10">
             <input
-              class="form-control"
+              className="form-control"
               id="inputTaskDesc"
               placeholder="Description"
               value={formData.desc}
@@ -127,12 +127,12 @@ const TaskForm = ({
           </div>
         </div>
 
-        <div class="form-group row form_elem_p">
-          <div class="col-sm-2 col-form-label">
-            <label for="taskInputChoices">Add task input</label>
+        <div className="form-group row form_elem_p">
+          <div className="col-sm-2 col-form-label">
+            <label htmlFor="taskInputChoices">Add task input</label>
           </div>
-          <div class="col-sm-2">
-            <select class="form-control"
+          <div className="col-sm-2">
+            <select className="form-control"
               id="taskInputChoices"
               onClick={(e) => setCurrTaskInput(e.target.value)}
               onChange={(e) => setCurrTaskInput(e.target.value)}
@@ -146,21 +146,21 @@ const TaskForm = ({
               }
             </select>
           </div>
-          <div class="col-sm-1">
+          <div className="col-sm-1">
             <button
-              class="btn btn-outline-secondary"
+              className="btn btn-outline-secondary"
               type="button"
               id="button-addon2"
               onClick={() => handleAddTaskInput(currTaskInput)}
             >
             Add</button>
           </div>
-          <div class="col-sm-7">
+          <div className="col-sm-7">
             { taskInputs ? taskInputs.map((t) =>
               <span>
                 <span className="badge bg-secondary">
                   In {t} &nbsp;
-                  <button type="button" class="btn btn-dark btn-sm"
+                  <button type="button" className="btn btn-dark btn-sm"
                     onClick={() => handleDeleteTaskInput(t)}>
                     <span>&times;</span>
                   </button>
@@ -171,12 +171,12 @@ const TaskForm = ({
           </div>
         </div>
 
-        <div class="form-group row form_elem_p">
-          <div class="col-sm-2 col-form-label">
-            <label for="taskInputChoices">Add task output</label>
+        <div className="form-group row form_elem_p">
+          <div className="col-sm-2 col-form-label">
+            <label htmlFor="taskInputChoices">Add task output</label>
           </div>
-          <div class="col-sm-2">
-            <select class="form-control"
+          <div className="col-sm-2">
+            <select className="form-control"
               id="taskInputChoices"
               onClick={(e) => setCurrTaskOutput(e.target.value)}
             >
@@ -189,20 +189,20 @@ const TaskForm = ({
               }
             </select>
           </div>
-          <div class="col-sm-1 input-group-append">
+          <div className="col-sm-1 input-group-append">
             <button
-              class="btn btn-outline-secondary"
+              className="btn btn-outline-secondary"
               type="button"
               id="button-addon2"
               onClick={() => handleAddTaskOutput(currTaskOutput)}
             >Add</button>
           </div>
-          <div class="col-sm-7">
+          <div className="col-sm-7">
             { taskOutputs ? taskOutputs.map((t) =>
               <span>
                 <span className="badge bg-secondary">
                   Out {t} &nbsp;
-                  <button type="button" class="btn btn-dark btn-sm"
+                  <button type="button" className="btn btn-dark btn-sm"
                     onClick={() => handleDeleteTaskOutput(t)}>
                     <span>&times;</span>
                   </button>
@@ -212,13 +212,13 @@ const TaskForm = ({
             ) : <span>No outputs</span> }
           </div>
         </div>
-        <div class="row">
-          <div class="col-sm-2">
+        <div className="row">
+          <div className="col-sm-2">
           </div>
-          <div class="col-sm-3">
+          <div className="col-sm-3">
             <button
               type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={() => handleSubmit()}
             >
               Add Task
@@ -226,13 +226,13 @@ const TaskForm = ({
             <span>&nbsp;</span>
             <button
               type="button"
-              class="btn btn-danger"
+              className="btn btn-danger"
               onClick={() => clear()}
               >
               Clear
             </button>
           </div>
-          <div class="col-sm-1">
+          <div className="col-sm-1">
           </div>
 
         </div>

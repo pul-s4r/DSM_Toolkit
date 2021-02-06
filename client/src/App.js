@@ -6,6 +6,8 @@ import usePersistedState from './usePersistedState.js';
 import TaskList from './components/TaskList.js';
 import TaskForm from './components/TaskForm.js';
 
+const dsm_app_url = "http://127.0.0.1:8000";
+
 const App = () => {
   // const [taskData, setTaskData] = useState([
     // { id: 1, seq: 1, name: "Task 1", tasks_in: [], tasks_out: ["2", "3"], desc: "Task 1" },
@@ -128,17 +130,51 @@ const App = () => {
       let seq = taskList[id].seq-1;
       for (const ti in taskList[id].tasks_in) {
         let inp = taskList[id].tasks_in[ti]-1;
-        dsm[seq][inp] = 1; 
+        dsm[seq][inp] = 1;
       }
     }
 
     return {dsm: dsm, labels: labels};
   }
 
-  const handleSubmit = () => {
-    var dsm_obj = toDSM(taskData);
-    console.log("DSM: ", dsm_obj.dsm);
-    console.log("Labels: ", dsm_obj.labels);
+  const handleSubmit = async () => {
+    var { dsm, labels } = toDSM(taskData);
+
+    // console.log("DSM: ", dsm);
+    // console.log("Labels: ", labels);
+
+    var query_data = JSON.stringify({
+      "mat": dsm,
+      "labels": labels,
+      "system_elements": []
+    });
+
+    console.log(query_data);
+
+    var create_response = await fetch(
+      dsm_app_url + "/new_dsm/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8"
+        },
+        body: query_data
+      }
+    );
+
+    var create_result = await create_response.json();
+
+    console.log("Creation: ", create_result);
+
+    var cluster_response = await fetch(
+      dsm_app_url + "/cluster/"
+    );
+
+    var cluster_result = await cluster_response.json();
+
+    console.log("Cluster result:", cluster_result.dsm);
+    console.log("New labels:", cluster_result.labels);
+    console.log("Cluster membership:", cluster_result.cluster);
   }
 
 

@@ -12,27 +12,26 @@ const TaskList = ({ setCurrentId, setEditMode, data, handleSubmit,
   }, [])
 
   return(
-    <div class="container">
+    <div className="container">
       <h1>Task List</h1>
       <button
-        class="btn btn-primary"
+        className="btn btn-primary"
         href="#"
-        role="button"
         onClick={() => handleSubmit()}
       >
         Cluster
       </button>
+      <span>&nbsp;</span>
       <button
-        class="btn btn-danger"
+        className="btn btn-danger"
         href="#"
-        role="button"
         onClick={() => handleClear()}
       >
         Clear
       </button>
 
-      <div class="table-responsive">
-          <table class="table table-striped table-sm">
+      <div className="table-responsive">
+          <table className="table table-striped table-sm">
             <thead>
               <tr>
                 <th>ID</th>
