@@ -47,6 +47,7 @@ class GeneratorState():
 
         self.dsm_result = None
         self.cluster_result = None
+        self.dsm_annotated = None
 
         self.generator = None
 
@@ -122,11 +123,13 @@ async def do_cluster():
     d_new_g = DSMMatrix.place_diag(new_dsm)
     app_state.cluster_result = c
     app_state.dsm_result = d_new_g
+    app_state.dsm_annotated = DSMMatrix.annotate_clusters(d_new_g, c)
 
     return {
         "dsm": app_state.dsm_result.tojson(),
         "labels": app_state.dsm_result.labels,
         "cluster": app_state.cluster_result.tojson(),
+        "dsm_a": app_state.dsm_annotated.tojson(), 
     }
 
 @app.get("/params/get")

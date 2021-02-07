@@ -5,7 +5,11 @@ import { strict as assert } from 'assert';
 import usePersistedState from './usePersistedState.js';
 import TaskList from './components/TaskList.js';
 import TaskForm from './components/TaskForm.js';
+import DSMatrix from './components/DSMatrix.js';
 
+import cdata from './sampletaskdata.js';
+
+// const cdata = [13, 5, 6, 6, 9, 11];
 const dsm_app_url = "http://127.0.0.1:8000";
 
 const App = () => {
@@ -172,7 +176,7 @@ const App = () => {
 
     var cluster_result = await cluster_response.json();
 
-    console.log("Cluster result:", cluster_result.dsm);
+    console.log("Cluster result:", cluster_result.dsm_a);
     console.log("New labels:", cluster_result.labels);
     console.log("Cluster membership:", cluster_result.cluster);
   }
@@ -199,6 +203,7 @@ const App = () => {
         availableOutTasks={taskData.map((task) => task.id)}
         data={taskData}
       />
+    <DSMatrix data={cdata} width={700} height={700} />
 
     </div>
   );
