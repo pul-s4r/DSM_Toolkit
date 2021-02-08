@@ -3,14 +3,15 @@ import * as d3 from 'd3';
 import 'bootstrap/dist/css/bootstrap.css';
 
 const DSMatrix = ( props ) => {
-  var margin = {
-    top: 100,
-    right: 0,
-    bottom: 0,
-    left: 100,
-  },
+  var margin = props.margin,
   width = props.width,
   height = props.height;
+
+  margin.top = margin.top ? margin.top : 100;
+  margin.right = margin.right ? margin.right : 0;
+  margin.bottom = margin.bottom ? margin.bottom : 0;
+  margin.left = margin.left ? margin.left : 100;
+
 
   const d3cont = useRef(null);
   var data = props.data;
@@ -24,9 +25,11 @@ const DSMatrix = ( props ) => {
   const drawChart = (data) => {
     // const h = props.height;
     // const w = props.width;
+    d3.select(d3cont.current).selectAll("*").remove();
 
     const svg = d3.select(d3cont.current)
       .append("svg")
+      .attr("class", "matrix_plot_area")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -63,9 +66,10 @@ const DSMatrix = ( props ) => {
           return i === p.x;
       });
       tooltip.transition().duration(200).style("opacity", .9);
-      tooltip.html(nodes[p.y].name + " [" + intToGroup(nodes[p.y].group) + "]</br>" +
-              nodes[p.x].name + " [" + intToGroup(nodes[p.x].group) + "]</br>" +
-              p.z + " relations")
+      tooltip.html("Task: " + nodes[p.y].name + "</br>" +
+              "Depends on task: " + nodes[p.x].name + "</br>" +
+              "Is in group: " + (matrix[p.x][p.y].g > 0
+              ? matrix[p.x][p.y].g : "None"))
           .style("left", (event.pageX + 30) + "px")
           .style("top", (event.pageY - 50) + "px");
     }
@@ -86,23 +90,23 @@ const DSMatrix = ( props ) => {
     // Create rows for the matrix
     nodes.forEach(function(node) {
       node.count = 0;
-      node.group = groupToInt(node.group);
       matrix[node.index] =
         d3.range(total_items).map(item_index => {
           return {
             x: item_index,
             y: node.index,
-            z: 0
+            z: 0,
+            g: 0,
           };
       });
     });
 
-    console.log(matrix);
-
     // Fill matrix with data from links and count how many times each item appears
+    // Currently underused: number of relations (z)
     data.links.forEach(function(link) {
         matrix[link.source][link.target].z += link.value;
         // matrix[link.target][link.source].z += link.value;
+        matrix[link.source][link.target].g = link.group;
         nodes[link.source].count += link.value;
         // nodes[link.target].count += link.value;
     });
@@ -125,11 +129,10 @@ const DSMatrix = ( props ) => {
         .attr("width", matrixScale.bandwidth())
         .attr("height", matrixScale.bandwidth())
         .style("fill-opacity", d => opacityScale(d.z)).style("fill", d => {
-            return nodes[d.x].group === nodes[d.y].group ? colorScale(nodes[d.x].group) : "grey";
+            return matrix[d.x][d.y].g > 0 ? colorScale(matrix[d.x][d.y].g) : "grey";
         })
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
-    console.log(matrixScale);
 
     var columns = svg.selectAll(".column")
         .data(matrix)
@@ -140,12 +143,12 @@ const DSMatrix = ( props ) => {
         });
 
     rows.append("text")
-                .attr("class", "label")
-                .attr("x", -5)
-                .attr("y", matrixScale.bandwidth() / 2)
-                .attr("dy", ".32em")
-                .attr("text-anchor", "end")
-                .text((d, i) => nodes[i].name);
+        .attr("class", "label")
+        .attr("x", -5)
+        .attr("y", matrixScale.bandwidth() / 2)
+        .attr("dy", ".32em")
+        .attr("text-anchor", "end")
+        .text((d, i) => nodes[i].name);
 
     columns.append("text")
         .attr("class", "label")
@@ -161,34 +164,6 @@ const DSMatrix = ( props ) => {
     columns.append("line")
         .attr("x1", -width);
   }
-
-  var groupToInt = (area) => {
-    if(area === "A") {
-      return 1;
-    } else if (area === "B") {
-      return 2;
-    } else if (area === "C") {
-      return 3;
-    } else if (area === "D") {
-      return 4;
-    } else {
-      return 0;
-    }
-  };
-
-  var intToGroup = function(area) {
-    if(area === 1){
-        return "A";
-    } else if (area === 2) {
-        return "B";
-    } else if (area === 3) {
-        return "C";
-    } else if (area === 4) {
-        return "D";
-    } else {
-        return "Z";
-    }
-  };
 
   return (
     <div className="container">

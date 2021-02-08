@@ -7,7 +7,13 @@ import TaskList from './components/TaskList.js';
 import TaskForm from './components/TaskForm.js';
 import DSMatrix from './components/DSMatrix.js';
 
-import cdata from './sampletaskdata.js';
+// import cdata from './sampletaskdata.js';
+const margin = {
+  top: 150,
+  right: 0,
+  bottom: 0,
+  left: 150,
+}
 
 // const cdata = [13, 5, 6, 6, 9, 11];
 const dsm_app_url = "http://127.0.0.1:8000";
@@ -26,9 +32,10 @@ const App = () => {
   const [currentId, setCurrentId] = usePersistedState("currentId", 0);
   const [editMode, setEditMode] = usePersistedState("editMode", 0);
 
+  const [matDispData, setMatDispData] = usePersistedState("matData",
+    {"nodes": [], "links": []});
+
   const handleAddOrChangeTask = async (task_name, l_tasks_in, l_tasks_out, task_desc, change_mode, ch_id) => {
-    console.log("Task received: ", task_name, l_tasks_in,
-      l_tasks_out, task_desc);
     let task_id = change_mode ? currentId : idCount;
     let task_seq = change_mode ? taskData.filter((e) => e.id === currentId)[0].seq
                     : seqCount;
@@ -40,7 +47,7 @@ const App = () => {
       tasks_out: l_tasks_out,
       desc: task_desc,
     };
-    console.log(entry);
+
     var exist_tasks = [...taskData];
     // Add all inputs as outputs for the corresponding tasks + vice versa
     for (let i = 0; i < l_tasks_in.length; i++) {
@@ -68,10 +75,8 @@ const App = () => {
       let i_change = exist_tasks.findIndex(x => x.id === ch_id);
       exist_tasks[i_change] = entry;
       await setTaskData(taskData => [...exist_tasks]);
-      console.log("(Change) Id: ", idCount, "Seq: ", seqCount);
     } else {
       await setTaskData(taskData => [...exist_tasks, entry]);
-      console.log("(Add) Id: ", idCount, "Seq: ", seqCount);
     }
   }
 
@@ -90,7 +95,6 @@ const App = () => {
     let entry_to_del = taskData.filter(entry => entry.id === id);
     let del_id = entry_to_del[0].id;
     let seq = entry_to_del[0].seq;
-    console.log("Delete seq: ", seq);
 
     // Exclude entry to delete and adjust sequence numbers of remaining entries
     let other_entries = taskData.filter(entry => entry.id !== id);
@@ -102,8 +106,6 @@ const App = () => {
         let filtered =
           other_entries[i].tasks_in.filter(entry => entry !== del_id);
         other_entries[i].tasks_in = filtered;
-        console.log("Need to delete: ", del_id, " from ", other_entries[i].id);
-        console.log(filtered);
       }
       if(other_entries[i].tasks_out.includes(del_id)) {
         let filtered =
@@ -113,7 +115,6 @@ const App = () => {
     }
     setTaskData(other_entries);
     setSeqCount(seqCount-1);
-    console.log("(Delete) Id: ", idCount, "Seq: ", seqCount);
   }
 
   const clear = () => {
@@ -144,16 +145,11 @@ const App = () => {
   const handleSubmit = async () => {
     var { dsm, labels } = toDSM(taskData);
 
-    // console.log("DSM: ", dsm);
-    // console.log("Labels: ", labels);
-
     var query_data = JSON.stringify({
       "mat": dsm,
       "labels": labels,
       "system_elements": []
     });
-
-    console.log(query_data);
 
     var create_response = await fetch(
       dsm_app_url + "/new_dsm/",
@@ -168,17 +164,33 @@ const App = () => {
 
     var create_result = await create_response.json();
 
-    console.log("Creation: ", create_result);
-
     var cluster_response = await fetch(
       dsm_app_url + "/cluster/"
     );
 
     var cluster_result = await cluster_response.json();
 
-    console.log("Cluster result:", cluster_result.dsm_a);
-    console.log("New labels:", cluster_result.labels);
-    console.log("Cluster membership:", cluster_result.cluster);
+    var dsmaNodes = dsmToDisplayNodes(JSON.parse(cluster_result.dsm_a),
+      cluster_result.labels);
+    setMatDispData(dsmaNodes);
+  }
+
+  const dsmToDisplayNodes = (rmat, mlabels) => {
+    var data = {
+      "nodes": [],
+      "links": [],
+    };
+
+    mlabels.map((ma, mi) => data.nodes.push(
+      {"index" : mi, "name": ma.toString(), "group": ""}
+    ));
+
+    rmat.map((tr, ri) => tr.map((tc, ci) => {
+      data.links.push({"source": ri, "target": ci, "value": tc >= 0 ? 1 : 0,
+        "group": tc > 0 ? tc : 0});
+    }));
+
+    return data;
   }
 
 
@@ -203,7 +215,7 @@ const App = () => {
         availableOutTasks={taskData.map((task) => task.id)}
         data={taskData}
       />
-    <DSMatrix data={cdata} width={700} height={700} />
+    <DSMatrix data={matDispData} width={700} height={700} margin={margin}/>
 
     </div>
   );
