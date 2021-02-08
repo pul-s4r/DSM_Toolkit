@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './styles.css'
@@ -141,8 +141,8 @@ const TaskForm = ({
                 availableInTasks ?
                   availableInTasks.filter(n => !taskInputs.includes(n))
                   .map((t) => (
-                  <option>{t}</option>
-                )) : <option></option>
+                  <option key={"input_ops_" + t}>{t}</option>
+                )) : <option key={"input_ops_blank"}></option>
               }
             </select>
           </div>
@@ -157,17 +157,17 @@ const TaskForm = ({
           </div>
           <div className="col-sm-7">
             { taskInputs ? taskInputs.map((t) =>
-              <span>
-                <span className="badge bg-secondary">
+              <span key={"in_span_" + t}>
+                <span key={"in_badge_" + t} className="badge bg-secondary">
                   In {t} &nbsp;
-                  <button type="button" className="btn btn-dark btn-sm"
+                  <button key={"in_btn_" + t} type="button" className="btn btn-dark btn-sm"
                     onClick={() => handleDeleteTaskInput(t)}>
                     <span>&times;</span>
                   </button>
                 </span>
-                <span>&nbsp;</span>
+                <span key={"out_bspace_" + t}>&nbsp;</span>
               </span>
-            ) : <span>No inputs</span> }
+            ) : <span key={"in_span_blank"}>No inputs</span> }
           </div>
         </div>
 
@@ -184,8 +184,8 @@ const TaskForm = ({
                 availableOutTasks ?
                   availableOutTasks.filter(n => !taskOutputs.includes(n))
                   .map((t) => (
-                  <option>{t}</option>
-                )) : <option></option>
+                  <option key={"output_ops_" + t}>{t}</option>
+                )) : <option key={"output_ops_blank"}></option>
               }
             </select>
           </div>
@@ -199,17 +199,17 @@ const TaskForm = ({
           </div>
           <div className="col-sm-7">
             { taskOutputs ? taskOutputs.map((t) =>
-              <span>
-                <span className="badge bg-secondary">
+              <span key={"out_span_" + t}>
+                <span key={"out_badge_" + t} className="badge bg-secondary">
                   Out {t} &nbsp;
-                  <button type="button" className="btn btn-dark btn-sm"
+                  <button key={"out_button_" + t} type="button" className="btn btn-dark btn-sm"
                     onClick={() => handleDeleteTaskOutput(t)}>
                     <span>&times;</span>
                   </button>
                 </span>
-                <span>&nbsp;</span>
+                <span key={"out_bspace_" + t}>&nbsp;</span>
               </span>
-            ) : <span>No outputs</span> }
+            ) : <span key={"out_span_blank"}>No outputs</span> }
           </div>
         </div>
         <div className="row">

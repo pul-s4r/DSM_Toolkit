@@ -46,7 +46,7 @@ const TaskList = ({ setCurrentId, setEditMode, data, handleSubmit,
             <tbody>
             {
               Array.isArray(data) && data ? data.map((task) => (
-                <tr>
+                <tr key={task.id}>
                   <td>{task.id}</td>
                   <td>{task.seq}</td>
                   <td>{task.name}</td>
